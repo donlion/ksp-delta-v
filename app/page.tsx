@@ -7,6 +7,7 @@ import MissionPanel from "@/components/MissionPanel";
 export default function Home() {
   const [selected, setSelected] = useState<string | null>(null);
   const [isReturn, setIsReturn] = useState(false);
+  const [fromLKO, setFromLKO] = useState(false);
 
   return (
     <main className="min-h-screen p-5 md:p-8 flex flex-col gap-6">
@@ -36,6 +37,8 @@ export default function Home() {
             destinationId={selected}
             isReturn={isReturn}
             onToggleReturn={() => setIsReturn((v) => !v)}
+            fromLKO={fromLKO}
+            onToggleFromLKO={() => setFromLKO((v) => !v)}
           />
         </div>
       </div>

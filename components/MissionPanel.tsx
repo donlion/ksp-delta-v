@@ -6,12 +6,16 @@ interface Props {
   destinationId: string | null;
   isReturn: boolean;
   onToggleReturn: () => void;
+  fromLKO: boolean;
+  onToggleFromLKO: () => void;
 }
 
 export default function MissionPanel({
   destinationId,
   isReturn,
   onToggleReturn,
+  fromLKO,
+  onToggleFromLKO,
 }: Props) {
   if (!destinationId) {
     return (
@@ -23,8 +27,12 @@ export default function MissionPanel({
 
   const dest = DESTINATIONS.find((d) => d.id === destinationId)!;
 
-  const outboundLegs = dest.legs;
-  const returnLegs = buildReturnLegs(dest.legs);
+  // When starting from LKO, strip the Kerbin Surface → LKO leg (outbound)
+  // and the LKO → Kerbin Surface leg (return).
+  const outboundLegs = fromLKO ? dest.legs.slice(1) : dest.legs;
+  const returnLegs = fromLKO
+    ? buildReturnLegs(dest.legs).slice(0, -1)
+    : buildReturnLegs(dest.legs);
   const allLegs: { label: string; legs: Leg[] }[] = isReturn
     ? [
         { label: "Outbound", legs: outboundLegs },
@@ -45,17 +53,29 @@ export default function MissionPanel({
           <p className="text-sm text-gray-400 mt-1">{dest.description}</p>
         </div>
 
-        {/* One-way / Return toggle */}
-        <button
-          onClick={onToggleReturn}
-          className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-colors ${
-            isReturn
-              ? "bg-ksp-orange border-ksp-orange text-white"
-              : "border-ksp-border text-gray-400 hover:border-gray-500 hover:text-gray-200"
-          }`}
-        >
-          <span>{isReturn ? "↩ Return trip" : "→ One-way"}</span>
-        </button>
+        {/* Toggles */}
+        <div className="flex flex-col gap-2 flex-shrink-0">
+          <button
+            onClick={onToggleReturn}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-colors ${
+              isReturn
+                ? "bg-ksp-orange border-ksp-orange text-white"
+                : "border-ksp-border text-gray-400 hover:border-gray-500 hover:text-gray-200"
+            }`}
+          >
+            {isReturn ? "↩ Return trip" : "→ One-way"}
+          </button>
+          <button
+            onClick={onToggleFromLKO}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-colors ${
+              fromLKO
+                ? "bg-blue-700 border-blue-600 text-white"
+                : "border-ksp-border text-gray-400 hover:border-gray-500 hover:text-gray-200"
+            }`}
+          >
+            {fromLKO ? "⬆ From LKO" : "⬆ From LKO"}
+          </button>
+        </div>
       </div>
 
       {/* Maneuver tables */}
