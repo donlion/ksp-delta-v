@@ -170,6 +170,18 @@ export const DESTINATIONS: Destination[] = [
 
   // ── Jool System ───────────────────────────────────────────────────────────
   {
+    id: "jool",
+    name: "Jool",
+    group: "Jool System",
+    description:
+      "Gas giant — no surface. Thick atmosphere; aerobraking into Jool orbit is possible but risky.",
+    legs: [
+      { from: "Kerbin Surface",   to: "Low Kerbin Orbit", deltaV: 3400 },
+      { from: "Low Kerbin Orbit", to: "Jool Transfer",    deltaV: 1915 },
+      { from: "Jool SOI Entry",   to: "Low Jool Orbit",   deltaV: 2820, canAerobrake: true },
+    ],
+  },
+  {
     id: "laythe",
     name: "Laythe",
     group: "Jool System",
@@ -292,6 +304,7 @@ export const BODY_COLORS: Record<string, string> = {
   duna:   "#c04040",
   ike:    "#808080",
   dres:   "#a0a0a0",
+  jool:   "#40a030",
   laythe: "#4080c0",
   tylo:   "#c0c080",
   vall:   "#60b0b0",

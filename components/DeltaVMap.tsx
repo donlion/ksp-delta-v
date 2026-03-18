@@ -89,10 +89,10 @@ const EDGES: EdgeDef[] = [
   { from: "transfer", to: "eeloo",    color: "#a0c0e0", width: 2,   dvLabel: "3,100", labelAt: 0.4 },
 ];
 
-// Selectable destinations (Jool is a gas giant — parent node only)
+// Selectable destinations
 const DESTINATIONS = new Set([
   "mun", "minmus", "moho", "eve", "gilly", "duna", "ike",
-  "dres", "laythe", "tylo", "vall", "bop", "pol", "eeloo",
+  "dres", "jool", "laythe", "tylo", "vall", "bop", "pol", "eeloo",
 ]);
 
 function labelPos(node: NodeDef): { x: number; y: number; anchor: "middle" | "start" | "end" } {

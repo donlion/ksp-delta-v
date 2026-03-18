@@ -136,7 +136,10 @@ export default function MissionPanel({
   const dest = DESTINATIONS.find((d) => d.id === destinationId)!;
   const color = BODY_COLORS[dest.id] ?? "var(--c-hal)";
 
-  const outboundLegs = dest.legs.slice(fromLKO ? 1 : 0, orbitOnly ? -1 : undefined);
+  // Gas giants have no surface — orbit is as far as you can go
+  const hasNoSurface = dest.id === "jool";
+
+  const outboundLegs = dest.legs.slice(fromLKO ? 1 : 0, (!hasNoSurface && orbitOnly) ? -1 : undefined);
   const returnLegs   = buildReturnLegs(dest.legs).slice(
     orbitOnly ? 1 : 0,
     fromLKO   ? -1 : undefined
@@ -182,7 +185,9 @@ export default function MissionPanel({
         <div className="flex gap-6">
           <ToggleSwitch active={isReturn}   onClick={onToggleReturn}     label="Return"     color={color} />
           <ToggleSwitch active={fromLKO}    onClick={onToggleFromLKO}    label="From LKO"   color={color} />
-          <ToggleSwitch active={orbitOnly}  onClick={onToggleOrbitOnly}  label="Orbit only" color={color} />
+          {!hasNoSurface && (
+            <ToggleSwitch active={orbitOnly}  onClick={onToggleOrbitOnly}  label="Orbit only" color={color} />
+          )}
         </div>
 
         {/* Redundancy slider */}
