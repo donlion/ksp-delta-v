@@ -36,3 +36,22 @@ main {
   position: relative;
   z-index: 1;
 }
+
+/* Range input thumb */
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--body-color, #e8760a);
+  cursor: pointer;
+  border: 2px solid rgba(0,0,0,0.4);
+}
+input[type='range']::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--body-color, #e8760a);
+  cursor: pointer;
+  border: 2px solid rgba(0,0,0,0.4);
+}

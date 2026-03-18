@@ -282,13 +282,22 @@ export const DESTINATION_GROUPS: DestinationGroup[] = [
   "Outer System",
 ];
 
-/** Group color accents for the UI */
-export const GROUP_COLORS: Record<DestinationGroup, string> = {
-  "Kerbin System": "text-green-400 border-green-400",
-  "Inner Planets": "text-orange-400 border-orange-400",
-  "Middle System": "text-red-400 border-red-400",
-  "Jool System": "text-purple-400 border-purple-400",
-  "Outer System": "text-blue-400 border-blue-400",
+/** Per-body accent colors (matches DeltaVMap node strokes) */
+export const BODY_COLORS: Record<string, string> = {
+  mun:    "#909090",
+  minmus: "#50a060",
+  moho:   "#c8a050",
+  eve:    "#8050c0",
+  gilly:  "#a070d0",
+  duna:   "#c04040",
+  ike:    "#808080",
+  dres:   "#a0a0a0",
+  laythe: "#4080c0",
+  tylo:   "#c0c080",
+  vall:   "#60b0b0",
+  bop:    "#806040",
+  pol:    "#c0a060",
+  eeloo:  "#a0c0e0",
 };
 
 /**

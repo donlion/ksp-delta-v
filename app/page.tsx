@@ -12,29 +12,29 @@ export default function Home() {
   const [redundancy, setRedundancy] = useState(0);
 
   return (
-    <main className="min-h-screen p-5 md:p-8 flex flex-col gap-6">
+    <main className="min-h-screen p-5 md:p-8 flex flex-col gap-8">
       {/* Header */}
       <header>
-        <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-          KSP <span className="text-ksp-orange">Δv</span> Planner
+        <h1 className="text-6xl md:text-7xl font-black text-white tracking-tight leading-none">
+          KSP <span className="text-ksp-orange">Δv</span>
         </h1>
-        <p className="text-gray-500 text-sm mt-1">
-          Kerbal Space Program 1 · Click a body to plan your mission
+        <p className="text-gray-600 text-xs mt-2 uppercase tracking-widest">
+          Mission Delta‑V Planner · Kerbal Space Program 1
         </p>
       </header>
 
-      {/* Main layout: map + panel */}
+      {/* Main layout */}
       <div className="flex flex-col xl:flex-row gap-6 items-start">
         {/* Delta-V map */}
         <div className="w-full xl:flex-1 bg-ksp-panel border border-ksp-border rounded-xl p-4">
           <DeltaVMap selected={selected} onSelect={setSelected} />
-          <p className="text-xs text-gray-600 mt-2 text-center">
-            Numbers show Δv (m/s) to reach orbit at each body · Click to select
+          <p className="text-xs text-gray-700 mt-2 text-center uppercase tracking-wide">
+            Δv to reach orbit · click to select
           </p>
         </div>
 
         {/* Mission panel */}
-        <div className="w-full xl:w-80 flex-shrink-0">
+        <div className="w-full xl:w-96 flex-shrink-0">
           <MissionPanel
             destinationId={selected}
             isReturn={isReturn}

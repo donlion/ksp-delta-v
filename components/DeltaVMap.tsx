@@ -183,13 +183,10 @@ export default function DeltaVMap({ selected, onSelect }: Props) {
           >
             {/* Selection glow */}
             {isSel && (
-              <circle
-                cx={node.x} cy={node.y} r={node.r + 7}
-                fill="none"
-                stroke={node.stroke}
-                strokeWidth={2}
-                opacity={0.4}
-              />
+              <>
+                <circle cx={node.x} cy={node.y} r={node.r + 12} fill="none" stroke={node.stroke} strokeWidth={1} opacity={0.15} />
+                <circle cx={node.x} cy={node.y} r={node.r + 7}  fill="none" stroke={node.stroke} strokeWidth={2} opacity={0.45} />
+              </>
             )}
 
             {/* Hover ring */}
@@ -228,9 +225,9 @@ export default function DeltaVMap({ selected, onSelect }: Props) {
                 x={lp.x} y={lp.y}
                 textAnchor={lp.anchor}
                 dominantBaseline="middle"
-                fill={isSel ? "#ffffff" : isHov ? "#dde0f0" : "#8090b0"}
-                fontSize={11}
-                fontWeight={isSel ? "600" : "400"}
+                fill={isSel ? "#ffffff" : isHov ? "#ffffff" : node.isWaypoint ? "#6070a0" : "#b8c8d8"}
+                fontSize={isSel ? 12 : 11}
+                fontWeight={isSel ? "700" : "400"}
                 fontFamily="system-ui, sans-serif"
               >
                 {node.label}
