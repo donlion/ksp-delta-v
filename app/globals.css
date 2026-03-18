@@ -2,34 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Theme variables ──────────────────────────────────────────────────────── */
 :root {
-  --background: #0a0e1a;
-  --foreground: #e2e8f0;
+  /* Dark — the void of space (default) */
+  --c-bg:      #040608;
+  --c-surface: #090c13;
+  --c-border:  #18243a;
+  --c-input:   #0f1a28;
+  --c-text:    #dce4f0;
+  --c-text2:   #5a7088;
+  --c-text3:   #2a3a4a;
+  --c-hal:     #bf2d1c;
+  --c-hal-dim: rgba(191, 45, 28, 0.20);
 }
 
+:root.light {
+  /* Light — Discovery One interior */
+  --c-bg:      #dedad2;
+  --c-surface: #eae7e0;
+  --c-border:  #b8b2a8;
+  --c-input:   #ccc8bf;
+  --c-text:    #1a1818;
+  --c-text2:   #60584f;
+  --c-text3:   #a09890;
+  --c-hal:     #bf2d1c;
+  --c-hal-dim: rgba(191, 45, 28, 0.12);
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: var(--c-bg);
+  color: var(--c-text);
 }
 
-/* Subtle star-field background */
+/* ── Star-field (dark mode only) ──────────────────────────────────────────── */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   background-image:
-    radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 30% 45%, rgba(255,255,255,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 55% 20%, rgba(255,255,255,0.5) 0%, transparent 100%),
-    radial-gradient(1px 1px at 70% 70%, rgba(255,255,255,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 85% 35%, rgba(255,255,255,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 20% 80%, rgba(255,255,255,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 45% 60%, rgba(255,255,255,0.2) 0%, transparent 100%),
-    radial-gradient(1px 1px at 92% 10%, rgba(255,255,255,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 5%  55%, rgba(255,255,255,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 65% 90%, rgba(255,255,255,0.2) 0%, transparent 100%);
+    radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.35) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 45%, rgba(255,255,255,0.25) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 20%, rgba(255,255,255,0.45) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 70%, rgba(255,255,255,0.25) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 35%, rgba(255,255,255,0.35) 0%, transparent 100%),
+    radial-gradient(1px 1px at 20% 80%, rgba(255,255,255,0.25) 0%, transparent 100%),
+    radial-gradient(1px 1px at 45% 60%, rgba(255,255,255,0.18) 0%, transparent 100%),
+    radial-gradient(1px 1px at 92% 10%, rgba(255,255,255,0.35) 0%, transparent 100%),
+    radial-gradient(1px 1px at  5% 55%, rgba(255,255,255,0.25) 0%, transparent 100%),
+    radial-gradient(1px 1px at 65% 90%, rgba(255,255,255,0.18) 0%, transparent 100%),
+    radial-gradient(1px 1px at 38% 28%, rgba(255,255,255,0.20) 0%, transparent 100%),
+    radial-gradient(1px 1px at 77% 52%, rgba(255,255,255,0.28) 0%, transparent 100%),
+    radial-gradient(1px 1px at 15% 38%, rgba(255,255,255,0.22) 0%, transparent 100%);
   pointer-events: none;
   z-index: 0;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+:root.light body::before {
+  opacity: 0;
 }
 
 main {
@@ -37,21 +69,33 @@ main {
   z-index: 1;
 }
 
-/* Range input thumb */
+/* ── Range input ──────────────────────────────────────────────────────────── */
+input[type='range'] {
+  outline: none;
+}
 input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--body-color, #e8760a);
+  background: var(--body-color, var(--c-hal));
   cursor: pointer;
-  border: 2px solid rgba(0,0,0,0.4);
+  border: 2px solid rgba(0,0,0,0.35);
 }
 input[type='range']::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--body-color, #e8760a);
+  background: var(--body-color, var(--c-hal));
   cursor: pointer;
-  border: 2px solid rgba(0,0,0,0.4);
+  border: 2px solid rgba(0,0,0,0.35);
+}
+
+/* ── HAL eye glow animation ───────────────────────────────────────────────── */
+@keyframes hal-pulse {
+  0%, 100% { box-shadow: 0 0 6px 1px var(--c-hal-dim); }
+  50%       { box-shadow: 0 0 14px 3px var(--c-hal-dim); }
+}
+.hal-glow {
+  animation: hal-pulse 3s ease-in-out infinite;
 }

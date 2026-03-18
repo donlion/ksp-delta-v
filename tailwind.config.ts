@@ -8,10 +8,19 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        "ksp-orange": "#e8760a",
-        "ksp-dark": "#0a0e1a",
-        "ksp-panel": "#0f1629",
-        "ksp-border": "#1e2d4a",
+        // CSS-variable-backed theme tokens
+        "void-bg":      "var(--c-bg)",
+        "void-surface": "var(--c-surface)",
+        "void-border":  "var(--c-border)",
+        "void-input":   "var(--c-input)",
+        "void-text":    "var(--c-text)",
+        "void-text2":   "var(--c-text2)",
+        "void-text3":   "var(--c-text3)",
+        "hal-red":      "var(--c-hal)",
+      },
+      fontFamily: {
+        sans: ["var(--font-space-grotesk)", "system-ui", "sans-serif"],
+        mono: ["var(--font-space-mono)", "'Courier New'", "monospace"],
       },
     },
   },

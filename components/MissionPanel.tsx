@@ -32,7 +32,7 @@ function ToggleSwitch({
     >
       <div
         className="relative w-10 h-5 rounded-full transition-all duration-200"
-        style={{ background: active ? color : "#1e2d4a" }}
+        style={{ background: active ? color : "var(--c-input)" }}
       >
         <div
           className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200"
@@ -40,8 +40,8 @@ function ToggleSwitch({
         />
       </div>
       <span
-        className="text-xs font-medium tracking-wide transition-colors"
-        style={{ color: active ? color : "#607080" }}
+        className="text-xs font-mono tracking-wide transition-colors uppercase"
+        style={{ color: active ? color : "var(--c-text3)" }}
       >
         {label}
       </span>
@@ -61,25 +61,25 @@ function LegBar({
   return (
     <div className="mb-4 last:mb-0">
       <div className="flex justify-between items-baseline mb-1.5 gap-2">
-        <span className="text-xs text-gray-500 truncate">
+        <span className="text-xs truncate" style={{ color: "var(--c-text3)" }}>
           {leg.from}
-          <span className="mx-1.5 text-gray-700">→</span>
+          <span className="mx-1.5" style={{ color: "var(--c-border)" }}>→</span>
           {leg.to}
           {leg.canAerobrake && (
-            <span className="ml-1.5 text-green-600 text-xs">[atm]</span>
+            <span className="ml-1.5 text-xs" style={{ color: "#4a9a60" }}>[atm]</span>
           )}
         </span>
-        <span className="text-sm font-mono font-bold text-white flex-shrink-0">
+        <span className="text-sm font-mono font-bold flex-shrink-0" style={{ color: "var(--c-text)" }}>
           {leg.deltaV.toLocaleString()}
         </span>
       </div>
-      <div className="h-1.5 rounded-full" style={{ background: "#0d1628" }}>
+      <div className="h-1.5 rounded-full" style={{ background: "var(--c-bg)" }}>
         <div
           className="h-full rounded-full transition-all duration-500"
           style={{
             width: `${Math.max(1, fraction * 100).toFixed(1)}%`,
             background: color,
-            opacity: 0.85,
+            opacity: 0.82,
           }}
         />
       </div>
@@ -100,20 +100,41 @@ export default function MissionPanel({
 }: Props) {
   if (!destinationId) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 gap-3 rounded-xl border border-ksp-border bg-ksp-panel p-8 text-center">
-        <span className="text-4xl">🛸</span>
-        <p className="text-sm font-medium text-gray-500 uppercase tracking-widest">
+      <div
+        className="flex flex-col items-center justify-center h-64 gap-4 rounded-xl p-8 text-center"
+        style={{
+          background: "var(--c-surface)",
+          border: "1px solid var(--c-border)",
+        }}
+      >
+        {/* HAL-style eye placeholder */}
+        <div
+          className="hal-glow w-12 h-12 rounded-full flex items-center justify-center"
+          style={{
+            background: "radial-gradient(circle at 40% 38%, #3a0a08 0%, #0a0204 70%)",
+            border: "1.5px solid rgba(191,45,28,0.35)",
+          }}
+        >
+          <div
+            className="w-5 h-5 rounded-full"
+            style={{
+              background: "radial-gradient(circle at 38% 35%, #e84030 0%, #8a1a10 55%, #3a0a06 100%)",
+              boxShadow: "0 0 8px 3px rgba(191,45,28,0.4)",
+            }}
+          />
+        </div>
+        <p className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--c-text2)" }}>
           Select a destination
         </p>
-        <p className="text-xs text-gray-700">
-          Click any body on the map to plan your mission
+        <p className="text-xs font-mono" style={{ color: "var(--c-text3)" }}>
+          Click any body on the map
         </p>
       </div>
     );
   }
 
   const dest = DESTINATIONS.find((d) => d.id === destinationId)!;
-  const color = BODY_COLORS[dest.id] ?? "#e8760a";
+  const color = BODY_COLORS[dest.id] ?? "var(--c-hal)";
 
   const outboundLegs = dest.legs.slice(fromLKO ? 1 : 0, orbitOnly ? -1 : undefined);
   const returnLegs   = buildReturnLegs(dest.legs).slice(
@@ -133,22 +154,26 @@ export default function MissionPanel({
 
   return (
     <div
-      className="rounded-xl overflow-hidden border border-ksp-border bg-ksp-panel flex flex-col"
-      style={{ "--body-color": color } as React.CSSProperties}
+      className="rounded-xl overflow-hidden flex flex-col"
+      style={{
+        background: "var(--c-surface)",
+        border: "1px solid var(--c-border)",
+        "--body-color": color,
+      } as React.CSSProperties}
     >
       {/* Colored top accent bar */}
-      <div className="h-1 w-full flex-shrink-0" style={{ background: color }} />
+      <div className="h-0.5 w-full flex-shrink-0" style={{ background: color }} />
 
       <div className="p-5 flex flex-col gap-5">
         {/* Header */}
         <div>
-          <p className="text-xs uppercase tracking-widest mb-1" style={{ color }}>
+          <p className="text-xs font-mono uppercase tracking-widest mb-1" style={{ color }}>
             {dest.group}
           </p>
-          <h2 className="text-4xl font-black text-white leading-none tracking-tight">
+          <h2 className="text-4xl font-black leading-none tracking-tight" style={{ color: "var(--c-text)" }}>
             {dest.name}
           </h2>
-          <p className="text-sm text-gray-500 mt-2 leading-relaxed">
+          <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--c-text2)" }}>
             {dest.description}
           </p>
         </div>
@@ -162,7 +187,7 @@ export default function MissionPanel({
 
         {/* Redundancy slider */}
         <div className="flex items-center gap-3">
-          <span className="text-xs uppercase tracking-widest text-gray-600 w-14 flex-shrink-0">
+          <span className="text-xs font-mono uppercase tracking-widest w-14 flex-shrink-0" style={{ color: "var(--c-text3)" }}>
             Margin
           </span>
           <input
@@ -172,12 +197,12 @@ export default function MissionPanel({
             onChange={(e) => onRedundancyChange(Number(e.target.value))}
             className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
             style={{
-              background: `linear-gradient(to right, ${color} ${redundancy * 2}%, #1e2d4a ${redundancy * 2}%)`,
+              background: `linear-gradient(to right, ${color} ${redundancy * 2}%, var(--c-input) ${redundancy * 2}%)`,
             }}
           />
           <span
             className="text-sm font-mono font-bold w-8 text-right flex-shrink-0"
-            style={{ color: redundancy > 0 ? color : "#607080" }}
+            style={{ color: redundancy > 0 ? color : "var(--c-text3)" }}
           >
             {redundancy}%
           </span>
@@ -187,7 +212,10 @@ export default function MissionPanel({
         {allLegs.map(({ label, legs }) => (
           <div key={label || "oneway"}>
             {label && (
-              <p className="text-xs uppercase tracking-widest text-gray-600 mb-3 pb-2 border-b border-ksp-border">
+              <p
+                className="text-xs font-mono uppercase tracking-widest mb-3 pb-2"
+                style={{ color: "var(--c-text3)", borderBottom: "1px solid var(--c-border)" }}
+              >
                 {label}
               </p>
             )}
@@ -205,10 +233,10 @@ export default function MissionPanel({
         {/* Total */}
         <div
           className="rounded-lg p-4 text-center"
-          style={{ background: color + "12", border: `1px solid ${color}30` }}
+          style={{ background: color + "12", border: `1px solid ${color}28` }}
         >
           {redundancy > 0 && (
-            <p className="text-xs text-gray-600 mb-1 font-mono">
+            <p className="text-xs font-mono mb-1" style={{ color: "var(--c-text3)" }}>
               {baseDV.toLocaleString()} × {(1 + redundancy / 100).toFixed(2)}
             </p>
           )}
@@ -218,12 +246,12 @@ export default function MissionPanel({
           >
             {totalDV.toLocaleString()}
           </div>
-          <p className="text-xs uppercase tracking-widest text-gray-600 mt-1.5">
+          <p className="text-xs font-mono uppercase tracking-widest mt-1.5" style={{ color: "var(--c-text3)" }}>
             m/s total Δv
           </p>
         </div>
 
-        <p className="text-xs text-gray-700 leading-relaxed">
+        <p className="text-xs font-mono leading-relaxed" style={{ color: "var(--c-text3)" }}>
           Community estimates · actual values vary by window &amp; trajectory ·
           aerobrake opportunities noted but not deducted
         </p>
