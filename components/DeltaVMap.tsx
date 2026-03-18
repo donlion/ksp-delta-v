@@ -120,6 +120,15 @@ export default function DeltaVMap({ selected, onSelect }: Props) {
       style={{ width: "100%", minWidth: 760 }}
       aria-label="KSP Delta-V map"
     >
+      <defs>
+        <pattern id="dot-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+          <circle cx="0" cy="0" r="0.8" fill="var(--c-text3)" opacity="0.35" />
+        </pattern>
+      </defs>
+
+      {/* Dot grid background */}
+      <rect width="100%" height="100%" fill="url(#dot-grid)" />
+
       {/* ── Edges ── */}
       {EDGES.map((edge, i) => {
         const f = NODES[edge.from];

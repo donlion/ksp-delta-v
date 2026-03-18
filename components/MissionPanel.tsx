@@ -101,7 +101,7 @@ export default function MissionPanel({
   if (!destinationId) {
     return (
       <div
-        className="flex flex-col items-center justify-center h-64 gap-4 rounded-xl p-8 text-center"
+        className="flex flex-col items-center justify-center h-64 gap-4 p-8 text-center"
         style={{
           background: "var(--c-surface)",
           border: "1px solid var(--c-border)",
@@ -109,14 +109,14 @@ export default function MissionPanel({
       >
         {/* HAL-style eye placeholder */}
         <div
-          className="hal-glow w-12 h-12 rounded-full flex items-center justify-center"
+          className="hal-glow w-14 h-14 rounded-full flex items-center justify-center"
           style={{
             background: "radial-gradient(circle at 40% 38%, #3a0a08 0%, #0a0204 70%)",
             border: "1.5px solid rgba(191,45,28,0.35)",
           }}
         >
           <div
-            className="w-5 h-5 rounded-full"
+            className="w-6 h-6 rounded-full"
             style={{
               background: "radial-gradient(circle at 38% 35%, #e84030 0%, #8a1a10 55%, #3a0a06 100%)",
               boxShadow: "0 0 8px 3px rgba(191,45,28,0.4)",
@@ -125,6 +125,9 @@ export default function MissionPanel({
         </div>
         <p className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--c-text2)" }}>
           Select a destination
+        </p>
+        <p className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--c-hal)", opacity: 0.6 }}>
+          I&apos;m sorry, Dave
         </p>
         <p className="text-xs font-mono" style={{ color: "var(--c-text3)" }}>
           Click any body on the map
@@ -157,22 +160,29 @@ export default function MissionPanel({
 
   return (
     <div
-      className="rounded-xl overflow-hidden flex flex-col"
+      className="overflow-hidden flex flex-col"
       style={{
         background: "var(--c-surface)",
         border: "1px solid var(--c-border)",
         "--body-color": color,
       } as React.CSSProperties}
     >
-      {/* Colored top accent bar */}
-      <div className="h-0.5 w-full flex-shrink-0" style={{ background: color }} />
+      {/* Colored terminal header strip */}
+      <div
+        className="px-4 py-2.5 flex items-baseline justify-between flex-shrink-0"
+        style={{ background: color + "22", borderBottom: `1px solid ${color}40` }}
+      >
+        <span className="text-xs font-mono uppercase tracking-widest" style={{ color: color }}>
+          {dest.group}
+        </span>
+        <span className="text-xs font-mono uppercase tracking-widest" style={{ color: color, opacity: 0.55 }}>
+          Mission Computer
+        </span>
+      </div>
 
       <div className="p-5 flex flex-col gap-5">
         {/* Header */}
         <div>
-          <p className="text-xs font-mono uppercase tracking-widest mb-1" style={{ color }}>
-            {dest.group}
-          </p>
           <h2 className="text-4xl font-black leading-none tracking-tight" style={{ color: "var(--c-text)" }}>
             {dest.name}
           </h2>
@@ -217,12 +227,13 @@ export default function MissionPanel({
         {allLegs.map(({ label, legs }) => (
           <div key={label || "oneway"}>
             {label && (
-              <p
-                className="text-xs font-mono uppercase tracking-widest mb-3 pb-2"
-                style={{ color: "var(--c-text3)", borderBottom: "1px solid var(--c-border)" }}
-              >
-                {label}
-              </p>
+              <div className="flex items-center gap-2 mb-3 pb-2" style={{ borderBottom: "1px solid var(--c-border)" }}>
+                <span className="text-xs font-mono" style={{ color: "var(--c-text3)", letterSpacing: "0.15em" }}>· · ·</span>
+                <p className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--c-text3)" }}>
+                  {label}
+                </p>
+                <span className="text-xs font-mono" style={{ color: "var(--c-text3)", letterSpacing: "0.15em" }}>· · ·</span>
+              </div>
             )}
             {legs.map((leg, i) => (
               <LegBar
@@ -237,9 +248,16 @@ export default function MissionPanel({
 
         {/* Total */}
         <div
-          className="rounded-lg p-4 text-center"
-          style={{ background: color + "12", border: `1px solid ${color}28` }}
+          className="p-4 text-center"
+          style={{ background: color + "12", border: `1px solid ${color}30` }}
         >
+          <p className="text-xs font-mono uppercase tracking-widest mb-2" style={{ color: color, opacity: 0.7 }}>
+            Total Mission Δv
+          </p>
+          <div
+            className="h-px w-16 mx-auto mb-3"
+            style={{ background: color, opacity: 0.35 }}
+          />
           {redundancy > 0 && (
             <p className="text-xs font-mono mb-1" style={{ color: "var(--c-text3)" }}>
               {baseDV.toLocaleString()} × {(1 + redundancy / 100).toFixed(2)}
@@ -252,7 +270,7 @@ export default function MissionPanel({
             {totalDV.toLocaleString()}
           </div>
           <p className="text-xs font-mono uppercase tracking-widest mt-1.5" style={{ color: "var(--c-text3)" }}>
-            m/s total Δv
+            m/s
           </p>
         </div>
 

@@ -26,7 +26,7 @@ export default function ThemeToggle() {
     >
       {/* HAL 9000 eye */}
       <div
-        className="hal-glow relative w-9 h-9 rounded-full flex items-center justify-center"
+        className="hal-glow relative w-10 h-10 rounded-full flex items-center justify-center"
         style={{
           background: "radial-gradient(circle at 40% 38%, #3a0a08 0%, #0a0204 70%)",
           border: "1.5px solid rgba(191,45,28,0.4)",
@@ -65,7 +65,7 @@ export default function ThemeToggle() {
         className="text-xs font-mono tracking-widest uppercase transition-colors"
         style={{ color: "var(--c-text3)" }}
       >
-        {isDark ? "Light" : "Dark"}
+        {isDark ? "Daylight" : "HAL Mode"}
       </span>
     </button>
   );
