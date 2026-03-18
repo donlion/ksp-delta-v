@@ -238,7 +238,8 @@ export default function MissionPanel({
     );
   }
 
-  const color = BODY_COLORS[dest!.id] ?? "var(--c-hal)";
+  const d = dest!;
+  const color = BODY_COLORS[d.id] ?? "var(--c-hal)";
 
   return (
     <div
@@ -263,7 +264,7 @@ export default function MissionPanel({
           className="text-xs font-mono uppercase tracking-widest"
           style={{ color: color }}
         >
-          {dest.group}
+          {d.group}
         </span>
         <span
           className="text-xs font-mono uppercase tracking-widest"
@@ -281,7 +282,7 @@ export default function MissionPanel({
             style={{ color: "var(--c-text)" }}
           >
             {displayedName}
-            {displayedName.length < dest.name.length && (
+            {displayedName.length < d.name.length && (
               <span style={{ color: "var(--c-hal)", opacity: 0.8 }}>▌</span>
             )}
           </h2>
@@ -289,7 +290,7 @@ export default function MissionPanel({
             className="text-sm mt-2 leading-relaxed"
             style={{ color: "var(--c-text2)" }}
           >
-            {dest.description}
+            {d.description}
           </p>
         </div>
 
