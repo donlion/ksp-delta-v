@@ -8,6 +8,33 @@ interface Props {
   onToggleReturn: () => void;
   fromLKO: boolean;
   onToggleFromLKO: () => void;
+  orbitOnly: boolean;
+  onToggleOrbitOnly: () => void;
+  redundancy: number; // percentage, 0–50
+  onRedundancyChange: (v: number) => void;
+}
+
+function Toggle({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm font-medium transition-colors ${
+        active
+          ? "bg-blue-700 border-blue-600 text-white"
+          : "border-ksp-border text-gray-400 hover:border-gray-500 hover:text-gray-200"
+      }`}
+    >
+      {children}
+    </button>
+  );
 }
 
 export default function MissionPanel({
@@ -16,6 +43,10 @@ export default function MissionPanel({
   onToggleReturn,
   fromLKO,
   onToggleFromLKO,
+  orbitOnly,
+  onToggleOrbitOnly,
+  redundancy,
+  onRedundancyChange,
 }: Props) {
   if (!destinationId) {
     return (
@@ -27,12 +58,17 @@ export default function MissionPanel({
 
   const dest = DESTINATIONS.find((d) => d.id === destinationId)!;
 
-  // When starting from LKO, strip the Kerbin Surface → LKO leg (outbound)
-  // and the LKO → Kerbin Surface leg (return).
-  const outboundLegs = fromLKO ? dest.legs.slice(1) : dest.legs;
-  const returnLegs = fromLKO
-    ? buildReturnLegs(dest.legs).slice(0, -1)
-    : buildReturnLegs(dest.legs);
+  // Slice outbound legs: skip launch leg (fromLKO) and/or landing leg (orbitOnly)
+  const outboundLegs = dest.legs.slice(
+    fromLKO ? 1 : 0,
+    orbitOnly ? -1 : undefined
+  );
+  // Slice return legs: skip landing leg (orbitOnly) and/or deorbit leg (fromLKO)
+  const returnLegs = buildReturnLegs(dest.legs).slice(
+    orbitOnly ? 1 : 0,
+    fromLKO ? -1 : undefined
+  );
+
   const allLegs: { label: string; legs: Leg[] }[] = isReturn
     ? [
         { label: "Outbound", legs: outboundLegs },
@@ -40,42 +76,47 @@ export default function MissionPanel({
       ]
     : [{ label: "", legs: outboundLegs }];
 
-  const totalDV = allLegs
-    .flatMap((s) => s.legs)
-    .reduce((sum, l) => sum + l.deltaV, 0);
+  const baseDV = allLegs.flatMap((s) => s.legs).reduce((sum, l) => sum + l.deltaV, 0);
+  const totalDV = Math.round(baseDV * (1 + redundancy / 100));
 
   return (
-    <div className="flex-1 flex flex-col gap-6 min-w-0">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-white">{dest.name}</h2>
-          <p className="text-sm text-gray-400 mt-1">{dest.description}</p>
-        </div>
+    <div className="flex flex-col gap-5 min-w-0">
+      {/* Destination name */}
+      <div>
+        <h2 className="text-2xl font-bold text-white">{dest.name}</h2>
+        <p className="text-sm text-gray-400 mt-1">{dest.description}</p>
+      </div>
 
-        {/* Toggles */}
-        <div className="flex flex-col gap-2 flex-shrink-0">
-          <button
-            onClick={onToggleReturn}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-colors ${
-              isReturn
-                ? "bg-ksp-orange border-ksp-orange text-white"
-                : "border-ksp-border text-gray-400 hover:border-gray-500 hover:text-gray-200"
-            }`}
-          >
-            {isReturn ? "↩ Return trip" : "→ One-way"}
-          </button>
-          <button
-            onClick={onToggleFromLKO}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-colors ${
-              fromLKO
-                ? "bg-blue-700 border-blue-600 text-white"
-                : "border-ksp-border text-gray-400 hover:border-gray-500 hover:text-gray-200"
-            }`}
-          >
-            {fromLKO ? "⬆ From LKO" : "⬆ From LKO"}
-          </button>
-        </div>
+      {/* Toggles */}
+      <div className="flex flex-wrap gap-2">
+        <Toggle active={isReturn} onClick={onToggleReturn}>
+          {isReturn ? "↩ Return" : "→ One-way"}
+        </Toggle>
+        <Toggle active={fromLKO} onClick={onToggleFromLKO}>
+          ⬆ From LKO
+        </Toggle>
+        <Toggle active={orbitOnly} onClick={onToggleOrbitOnly}>
+          ○ Orbit only
+        </Toggle>
+      </div>
+
+      {/* Redundancy slider */}
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-gray-500 uppercase tracking-wide whitespace-nowrap">
+          Margin
+        </span>
+        <input
+          type="range"
+          min={0}
+          max={50}
+          step={5}
+          value={redundancy}
+          onChange={(e) => onRedundancyChange(Number(e.target.value))}
+          className="flex-1 accent-ksp-orange h-1.5 cursor-pointer"
+        />
+        <span className="text-sm font-mono text-ksp-orange w-8 text-right">
+          {redundancy}%
+        </span>
       </div>
 
       {/* Maneuver tables */}
@@ -123,9 +164,16 @@ export default function MissionPanel({
 
       {/* Total */}
       <div className="flex items-center justify-between px-4 py-4 rounded-lg bg-ksp-panel border border-ksp-border">
-        <span className="text-sm font-medium text-gray-400 uppercase tracking-wide">
-          Total Delta-V
-        </span>
+        <div>
+          <span className="text-sm font-medium text-gray-400 uppercase tracking-wide">
+            Total Delta-V
+          </span>
+          {redundancy > 0 && (
+            <p className="text-xs text-gray-600 mt-0.5">
+              {baseDV.toLocaleString()} × {(1 + redundancy / 100).toFixed(2)}
+            </p>
+          )}
+        </div>
         <span className="text-3xl font-bold font-mono text-ksp-orange">
           {totalDV.toLocaleString()}{" "}
           <span className="text-base font-normal text-gray-500">m/s</span>

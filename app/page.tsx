@@ -8,6 +8,8 @@ export default function Home() {
   const [selected, setSelected] = useState<string | null>(null);
   const [isReturn, setIsReturn] = useState(false);
   const [fromLKO, setFromLKO] = useState(false);
+  const [orbitOnly, setOrbitOnly] = useState(false);
+  const [redundancy, setRedundancy] = useState(0);
 
   return (
     <main className="min-h-screen p-5 md:p-8 flex flex-col gap-6">
@@ -39,6 +41,10 @@ export default function Home() {
             onToggleReturn={() => setIsReturn((v) => !v)}
             fromLKO={fromLKO}
             onToggleFromLKO={() => setFromLKO((v) => !v)}
+            orbitOnly={orbitOnly}
+            onToggleOrbitOnly={() => setOrbitOnly((v) => !v)}
+            redundancy={redundancy}
+            onRedundancyChange={setRedundancy}
           />
         </div>
       </div>
