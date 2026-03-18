@@ -98,7 +98,7 @@ const DESTINATIONS = new Set([
   "dres", "laythe", "tylo", "vall", "bop", "pol", "eeloo",
 ]);
 
-function labelPos(node: NodeDef): { x: number; y: number; anchor: string } {
+function labelPos(node: NodeDef): { x: number; y: number; anchor: "middle" | "start" | "end" } {
   const pad = node.r + 12;
   switch (node.labelDir) {
     case "above": return { x: node.x,       y: node.y - node.r - 5, anchor: "middle" };
@@ -119,8 +119,8 @@ export default function DeltaVMap({ selected, onSelect }: Props) {
   return (
     <svg
       viewBox="0 0 920 570"
-      className="w-full select-none"
-      style={{ minWidth: 480 }}
+      className="select-none"
+      style={{ width: "100%", minWidth: 760 }}
       aria-label="KSP Delta-V map"
     >
       {/* ── Edges ── */}

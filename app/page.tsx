@@ -26,10 +26,13 @@ export default function Home() {
       {/* Main layout */}
       <div className="flex flex-col xl:flex-row gap-6 items-start">
         {/* Delta-V map */}
-        <div className="w-full xl:flex-1 bg-ksp-panel border border-ksp-border rounded-xl p-4">
+        <div className="w-full xl:flex-1 bg-ksp-panel border border-ksp-border rounded-xl p-4 overflow-x-auto">
           <DeltaVMap selected={selected} onSelect={setSelected} />
           <p className="text-xs text-gray-700 mt-2 text-center uppercase tracking-wide">
             Δv to reach orbit · click to select
+          </p>
+          <p className="text-xs text-gray-700 mt-1 text-center xl:hidden">
+            ← scroll to explore →
           </p>
         </div>
 
