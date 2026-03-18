@@ -19,9 +19,14 @@ export interface Destination {
   name: string;
   group: DestinationGroup;
   description: string;
+  /** Surface gravity in m/s². Omit for Jool (gas giant, no surface). */
+  surfaceGravity?: number;
   /** Legs from Kerbin Surface to destination surface (one-way) */
   legs: Leg[];
 }
+
+/** Kerbin surface gravity (m/s²) — reference for "g" comparisons */
+export const KERBIN_GRAVITY = 9.81;
 
 /**
  * Standard KSP1 delta-v values based on the community delta-v map.
@@ -34,6 +39,7 @@ export const DESTINATIONS: Destination[] = [
     name: "Mun",
     group: "Kerbin System",
     description: "Kerbin's primary moon. No atmosphere, moderate gravity.",
+    surfaceGravity: 1.63,
     legs: [
       { from: "Kerbin Surface", to: "Low Kerbin Orbit", deltaV: 3400 },
       { from: "Low Kerbin Orbit", to: "Mun Transfer", deltaV: 860 },
@@ -46,6 +52,7 @@ export const DESTINATIONS: Destination[] = [
     name: "Minmus",
     group: "Kerbin System",
     description: "Kerbin's small outer moon. Very low gravity, great for fuel depots.",
+    surfaceGravity: 0.491,
     legs: [
       { from: "Kerbin Surface", to: "Low Kerbin Orbit", deltaV: 3400 },
       { from: "Low Kerbin Orbit", to: "Minmus Transfer", deltaV: 930 },
@@ -60,6 +67,7 @@ export const DESTINATIONS: Destination[] = [
     name: "Moho",
     group: "Inner Planets",
     description: "Innermost planet. No atmosphere — expensive capture burn required.",
+    surfaceGravity: 2.7,
     legs: [
       { from: "Kerbin Surface", to: "Low Kerbin Orbit", deltaV: 3400 },
       { from: "Low Kerbin Orbit", to: "Moho Transfer", deltaV: 760 },
@@ -73,6 +81,7 @@ export const DESTINATIONS: Destination[] = [
     group: "Inner Planets",
     description:
       "Purple planet with a crushing atmosphere. Returning from the surface is the hardest challenge in KSP.",
+    surfaceGravity: 16.7,
     legs: [
       { from: "Kerbin Surface", to: "Low Kerbin Orbit", deltaV: 3400 },
       { from: "Low Kerbin Orbit", to: "Eve Transfer", deltaV: 1030 },
@@ -96,6 +105,7 @@ export const DESTINATIONS: Destination[] = [
     group: "Inner Planets",
     description:
       "Tiny irregular moon of Eve. Almost no gravity — walking speed can exceed escape velocity.",
+    surfaceGravity: 0.049,
     legs: [
       { from: "Kerbin Surface", to: "Low Kerbin Orbit", deltaV: 3400 },
       { from: "Low Kerbin Orbit", to: "Eve Transfer", deltaV: 1030 },
@@ -118,6 +128,7 @@ export const DESTINATIONS: Destination[] = [
     group: "Middle System",
     description:
       "Mars-like red planet with a thin atmosphere. Parachutes work here.",
+    surfaceGravity: 2.94,
     legs: [
       { from: "Kerbin Surface", to: "Low Kerbin Orbit", deltaV: 3400 },
       { from: "Low Kerbin Orbit", to: "Duna Transfer", deltaV: 1060 },
@@ -140,6 +151,7 @@ export const DESTINATIONS: Destination[] = [
     name: "Ike",
     group: "Middle System",
     description: "Duna's large moon. Very close to Duna — easy side trip.",
+    surfaceGravity: 1.1,
     legs: [
       { from: "Kerbin Surface", to: "Low Kerbin Orbit", deltaV: 3400 },
       { from: "Low Kerbin Orbit", to: "Duna Transfer", deltaV: 1060 },
@@ -160,6 +172,7 @@ export const DESTINATIONS: Destination[] = [
     group: "Middle System",
     description:
       "Lonely asteroid-like dwarf planet in an inclined orbit. No moons, no atmosphere.",
+    surfaceGravity: 1.13,
     legs: [
       { from: "Kerbin Surface", to: "Low Kerbin Orbit", deltaV: 3400 },
       { from: "Low Kerbin Orbit", to: "Dres Transfer", deltaV: 1290 },
@@ -187,6 +200,7 @@ export const DESTINATIONS: Destination[] = [
     group: "Jool System",
     description:
       "Ocean moon of Jool with a breathable atmosphere. Jet engines work here.",
+    surfaceGravity: 1.96,
     legs: [
       { from: "Kerbin Surface", to: "Low Kerbin Orbit", deltaV: 3400 },
       { from: "Low Kerbin Orbit", to: "Jool Transfer", deltaV: 1915 },
@@ -216,6 +230,7 @@ export const DESTINATIONS: Destination[] = [
     group: "Jool System",
     description:
       "Largest Jool moon. No atmosphere and strong gravity — hardest landing in Jool system.",
+    surfaceGravity: 7.85,
     legs: [
       { from: "Kerbin Surface", to: "Low Kerbin Orbit", deltaV: 3400 },
       { from: "Low Kerbin Orbit", to: "Jool Transfer", deltaV: 1915 },
@@ -230,6 +245,7 @@ export const DESTINATIONS: Destination[] = [
     name: "Vall",
     group: "Jool System",
     description: "Icy moon of Jool. No atmosphere, medium gravity.",
+    surfaceGravity: 2.31,
     legs: [
       { from: "Kerbin Surface", to: "Low Kerbin Orbit", deltaV: 3400 },
       { from: "Low Kerbin Orbit", to: "Jool Transfer", deltaV: 1915 },
@@ -245,6 +261,7 @@ export const DESTINATIONS: Destination[] = [
     group: "Jool System",
     description:
       "Captured asteroid moon of Jool in a highly inclined orbit. Very low gravity.",
+    surfaceGravity: 0.589,
     legs: [
       { from: "Kerbin Surface", to: "Low Kerbin Orbit", deltaV: 3400 },
       { from: "Low Kerbin Orbit", to: "Jool Transfer", deltaV: 1915 },
@@ -260,6 +277,7 @@ export const DESTINATIONS: Destination[] = [
     group: "Jool System",
     description:
       "Outermost and smallest moon of Jool. Lumpy surface, negligible gravity.",
+    surfaceGravity: 0.373,
     legs: [
       { from: "Kerbin Surface", to: "Low Kerbin Orbit", deltaV: 3400 },
       { from: "Low Kerbin Orbit", to: "Jool Transfer", deltaV: 1915 },
@@ -277,6 +295,7 @@ export const DESTINATIONS: Destination[] = [
     group: "Outer System",
     description:
       "Icy dwarf planet at the edge of the solar system. No atmosphere.",
+    surfaceGravity: 1.69,
     legs: [
       { from: "Kerbin Surface", to: "Low Kerbin Orbit", deltaV: 3400 },
       { from: "Low Kerbin Orbit", to: "Eeloo Transfer", deltaV: 1960 },

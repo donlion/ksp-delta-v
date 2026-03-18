@@ -5,6 +5,7 @@ import {
   DESTINATIONS,
   BODY_COLORS,
   buildReturnLegs,
+  KERBIN_GRAVITY,
   type Leg,
 } from "@/lib/deltav-data";
 
@@ -292,6 +293,15 @@ export default function MissionPanel({
           >
             {d.description}
           </p>
+          {d.surfaceGravity != null && (
+            <p
+              className="text-xs font-mono mt-2"
+              style={{ color: "var(--c-text3)" }}
+            >
+              {d.surfaceGravity.toFixed(2)} m/s² (
+              {(d.surfaceGravity / KERBIN_GRAVITY).toFixed(2)} g)
+            </p>
+          )}
         </div>
 
         {/* Toggle switches */}
@@ -431,6 +441,12 @@ export default function MissionPanel({
         >
           Community estimates · actual values vary by window &amp; trajectory ·
           aerobrake opportunities noted but not deducted
+        </p>
+        <p
+          className="text-xs font-mono mt-1"
+          style={{ color: "var(--c-text3)", opacity: 0.8 }}
+        >
+          Kerbin surface: {KERBIN_GRAVITY} m/s² (1 g) — reference
         </p>
       </div>
     </div>
