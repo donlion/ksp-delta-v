@@ -54,9 +54,6 @@ export default function Home() {
 
   return (
     <>
-      {/* CRT scan sweep bar */}
-      <div className="scan-sweep" />
-
       <main className="min-h-screen p-5 md:p-8 flex flex-col gap-6">
         {/* Header */}
         <header className="flex items-start justify-between gap-4">

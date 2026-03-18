@@ -91,68 +91,6 @@ input[type='range']::-moz-range-thumb {
   border: 2px solid rgba(0,0,0,0.35);
 }
 
-/* ── CRT scanlines ────────────────────────────────────────────────────────── */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0px,
-    transparent 2px,
-    rgba(0, 0, 0, 0.10) 2px,
-    rgba(0, 0, 0, 0.10) 4px
-  );
-  pointer-events: none;
-  z-index: 9998;
-}
-
-:root.light body::after {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0px,
-    transparent 2px,
-    rgba(0, 0, 0, 0.04) 2px,
-    rgba(0, 0, 0, 0.04) 4px
-  );
-}
-
-/* ── CRT scan sweep ───────────────────────────────────────────────────────── */
-@keyframes scan-sweep {
-  0%   { transform: translateY(-100%); }
-  100% { transform: translateY(100vh); }
-}
-
-body::before {
-  /* star-field pseudo already uses ::before, so we use a separate element */
-}
-
-.scan-sweep {
-  position: fixed;
-  inset-inline: 0;
-  top: 0;
-  height: 120px;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(255, 255, 255, 0.025) 40%,
-    rgba(255, 255, 255, 0.025) 60%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 9997;
-  animation: scan-sweep 8s linear infinite;
-}
-
-:root.light .scan-sweep {
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.015) 40%,
-    rgba(0, 0, 0, 0.015) 60%,
-    transparent 100%
-  );
-}
 
 /* ── HAL eye glow animation ───────────────────────────────────────────────── */
 @keyframes hal-pulse {
