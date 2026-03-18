@@ -105,6 +105,7 @@ export default function Home() {
             <div
               className="p-4 overflow-x-auto"
               style={{
+                position: "relative",
                 background: "var(--c-surface)",
                 borderLeft:   "1px solid var(--c-border)",
                 borderRight:  "1px solid var(--c-border)",
@@ -112,6 +113,17 @@ export default function Home() {
               }}
             >
               <DeltaVMap selected={selected} onSelect={setSelected} />
+              {/* CRT vignette */}
+              <div
+                className="map-vignette"
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  pointerEvents: "none",
+                  background: "radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(0,0,0,0.72) 100%)",
+                  zIndex: 5,
+                }}
+              />
               <p className="text-xs mt-2 text-center font-mono uppercase tracking-widest" style={{ color: "var(--c-text3)" }}>
                 [ Δv to reach orbit · click body to select ]
               </p>

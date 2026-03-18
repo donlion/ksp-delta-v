@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface NodeDef {
   x: number;
@@ -112,6 +112,15 @@ interface Props {
 
 export default function DeltaVMap({ selected, onSelect }: Props) {
   const [hovered, setHovered] = useState<string | null>(null);
+  const [bloomed, setBloomed] = useState<Set<string>>(new Set());
+
+  // Staggered colour bloom on mount — systems coming online
+  useEffect(() => {
+    const ids = Object.keys(NODES);
+    ids.forEach((id, i) => {
+      setTimeout(() => setBloomed((prev) => new Set([...prev, id])), i * 110);
+    });
+  }, []);
 
   return (
     <svg
@@ -176,10 +185,12 @@ export default function DeltaVMap({ selected, onSelect }: Props) {
 
       {/* ── Nodes ── */}
       {Object.entries(NODES).map(([id, node]) => {
-        const isDest = DESTINATIONS.has(id);
-        const isSel  = selected === id;
-        const isHov  = hovered  === id;
-        const lp     = labelPos(node);
+        const isDest    = DESTINATIONS.has(id);
+        const isSel     = selected === id;
+        const isHov     = hovered  === id;
+        const lp        = labelPos(node);
+        const isBloomed = bloomed.has(id);
+        const nodeColor = isBloomed ? node.stroke : "#3a3d46";
 
         // Label color
         const labelFill = isSel
@@ -201,8 +212,8 @@ export default function DeltaVMap({ selected, onSelect }: Props) {
             {/* Selection glow rings */}
             {isSel && (
               <>
-                <circle cx={node.x} cy={node.y} r={node.r + 12} fill="none" stroke={node.stroke} strokeWidth={1} opacity={0.12} />
-                <circle cx={node.x} cy={node.y} r={node.r + 7}  fill="none" stroke={node.stroke} strokeWidth={1.5} opacity={0.4} />
+                <circle cx={node.x} cy={node.y} r={node.r + 12} fill="none" stroke={nodeColor} strokeWidth={1} opacity={0.12} />
+                <circle cx={node.x} cy={node.y} r={node.r + 7}  fill="none" stroke={nodeColor} strokeWidth={1.5} opacity={0.4} />
               </>
             )}
 
@@ -211,7 +222,7 @@ export default function DeltaVMap({ selected, onSelect }: Props) {
               <circle
                 cx={node.x} cy={node.y} r={node.r + 4}
                 fill="none"
-                stroke={node.stroke}
+                stroke={nodeColor}
                 strokeWidth={1.5}
                 opacity={0.45}
               />
@@ -220,8 +231,11 @@ export default function DeltaVMap({ selected, onSelect }: Props) {
             {/* Body circle */}
             <circle
               cx={node.x} cy={node.y} r={node.r}
-              style={{ fill: isSel ? node.stroke + "28" : "var(--c-bg)" }}
-              stroke={node.stroke}
+              style={{
+                fill: isSel ? nodeColor + "28" : "var(--c-bg)",
+                stroke: nodeColor,
+                transition: "stroke 0.6s ease",
+              }}
               strokeWidth={isSel ? 2.5 : 1.5}
               opacity={node.isWaypoint ? 0.45 : 1}
             />
@@ -231,7 +245,7 @@ export default function DeltaVMap({ selected, onSelect }: Props) {
               <circle
                 cx={node.x} cy={node.y}
                 r={node.r * 0.32}
-                fill={isSel ? "#fff" : node.stroke}
+                style={{ fill: isSel ? "#fff" : nodeColor, transition: "fill 0.6s ease" }}
                 opacity={0.7}
               />
             )}

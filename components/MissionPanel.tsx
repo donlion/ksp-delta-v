@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { DESTINATIONS, BODY_COLORS, buildReturnLegs, type Leg } from "@/lib/deltav-data";
 
 interface Props {
@@ -53,13 +54,15 @@ function LegBar({
   leg,
   fraction,
   color,
+  index,
 }: {
   leg: Leg;
   fraction: number;
   color: string;
+  index: number;
 }) {
   return (
-    <div className="mb-4 last:mb-0">
+    <div className="mb-4 last:mb-0 leg-animate" style={{ animationDelay: `${index * 110}ms` }}>
       <div className="flex justify-between items-baseline mb-1.5 gap-2">
         <span className="text-xs truncate" style={{ color: "var(--c-text3)" }}>
           {leg.from}
@@ -98,6 +101,32 @@ export default function MissionPanel({
   redundancy,
   onRedundancyChange,
 }: Props) {
+  // ── Typewriter for destination name ──────────────────────────────────────
+  const [displayedName, setDisplayedName] = useState("");
+  useEffect(() => {
+    setDisplayedName("");
+    if (!destinationId) return;
+    const dest = DESTINATIONS.find((d) => d.id === destinationId);
+    if (!dest) return;
+    let i = 0;
+    const id = setInterval(() => {
+      i++;
+      setDisplayedName(dest.name.slice(0, i));
+      if (i >= dest.name.length) clearInterval(id);
+    }, 55);
+    return () => clearInterval(id);
+  }, [destinationId]);
+
+  // ── Δv count-up ──────────────────────────────────────────────────────────
+  const animRef = useRef<number>(0);
+  const currentDisplayed = useRef(0);
+  const [displayedDV, setDisplayedDV] = useState(0);
+
+  useEffect(() => {
+    currentDisplayed.current = 0;
+    setDisplayedDV(0);
+  }, [destinationId]);
+
   if (!destinationId) {
     return (
       <div
@@ -158,6 +187,25 @@ export default function MissionPanel({
   const baseDV  = allLegs.flatMap((s) => s.legs).reduce((s, l) => s + l.deltaV, 0);
   const totalDV = Math.round(baseDV * (1 + redundancy / 100));
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    cancelAnimationFrame(animRef.current);
+    const start = currentDisplayed.current;
+    const end = totalDV;
+    const duration = 900;
+    const t0 = performance.now();
+    function tick(now: number) {
+      const t = Math.min((now - t0) / duration, 1);
+      const eased = 1 - (1 - t) ** 3;
+      const val = Math.round(start + (end - start) * eased);
+      currentDisplayed.current = val;
+      setDisplayedDV(val);
+      if (t < 1) animRef.current = requestAnimationFrame(tick);
+    }
+    animRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animRef.current);
+  }, [totalDV]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <div
       className="overflow-hidden flex flex-col"
@@ -183,8 +231,11 @@ export default function MissionPanel({
       <div className="p-5 flex flex-col gap-5">
         {/* Header */}
         <div>
-          <h2 className="text-4xl font-black leading-none tracking-tight" style={{ color: "var(--c-text)" }}>
-            {dest.name}
+          <h2 className="text-4xl font-black leading-none tracking-tight font-mono" style={{ color: "var(--c-text)" }}>
+            {displayedName}
+            {displayedName.length < dest.name.length && (
+              <span style={{ color: "var(--c-hal)", opacity: 0.8 }}>▌</span>
+            )}
           </h2>
           <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--c-text2)" }}>
             {dest.description}
@@ -223,28 +274,31 @@ export default function MissionPanel({
           </span>
         </div>
 
-        {/* Leg sections */}
-        {allLegs.map(({ label, legs }) => (
-          <div key={label || "oneway"}>
-            {label && (
-              <div className="flex items-center gap-2 mb-3 pb-2" style={{ borderBottom: "1px solid var(--c-border)" }}>
-                <span className="text-xs font-mono" style={{ color: "var(--c-text3)", letterSpacing: "0.15em" }}>· · ·</span>
-                <p className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--c-text3)" }}>
-                  {label}
-                </p>
-                <span className="text-xs font-mono" style={{ color: "var(--c-text3)", letterSpacing: "0.15em" }}>· · ·</span>
-              </div>
-            )}
-            {legs.map((leg, i) => (
-              <LegBar
-                key={i}
-                leg={leg}
-                fraction={leg.deltaV / baseDV}
-                color={color}
-              />
-            ))}
-          </div>
-        ))}
+        {/* Leg sections — keyed on destinationId so CSS animations replay on body change */}
+        <div key={destinationId}>
+          {allLegs.map(({ label, legs }) => (
+            <div key={label || "oneway"} className="mb-2 last:mb-0">
+              {label && (
+                <div className="flex items-center gap-2 mb-3 pb-2" style={{ borderBottom: "1px solid var(--c-border)" }}>
+                  <span className="text-xs font-mono" style={{ color: "var(--c-text3)", letterSpacing: "0.15em" }}>· · ·</span>
+                  <p className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--c-text3)" }}>
+                    {label}
+                  </p>
+                  <span className="text-xs font-mono" style={{ color: "var(--c-text3)", letterSpacing: "0.15em" }}>· · ·</span>
+                </div>
+              )}
+              {legs.map((leg, i) => (
+                <LegBar
+                  key={i}
+                  index={i}
+                  leg={leg}
+                  fraction={leg.deltaV / baseDV}
+                  color={color}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
 
         {/* Total */}
         <div
@@ -267,7 +321,7 @@ export default function MissionPanel({
             className="text-5xl font-black font-mono leading-none"
             style={{ color }}
           >
-            {totalDV.toLocaleString()}
+            {displayedDV.toLocaleString()}
           </div>
           <p className="text-xs font-mono uppercase tracking-widest mt-1.5" style={{ color: "var(--c-text3)" }}>
             m/s
