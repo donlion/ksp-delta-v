@@ -5,6 +5,7 @@ import {
   DESTINATIONS,
   BODY_COLORS,
   DIFFICULTY_COLORS,
+  ISRU_COLORS,
   buildReturnLegs,
   KERBIN_GRAVITY,
   type Leg,
@@ -327,18 +328,41 @@ export default function MissionPanel({
               {(d.surfaceGravity / KERBIN_GRAVITY).toFixed(2)} g)
             </p>
           )}
-          <p className="flex items-center gap-1.5 mt-2">
-            <span
-              className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
-              style={{ background: DIFFICULTY_COLORS[d.difficulty] }}
-            />
+          <div className="flex items-center gap-4 mt-2 flex-wrap">
+            <span className="flex items-center gap-1.5">
+              <span
+                className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
+                style={{ background: DIFFICULTY_COLORS[d.difficulty] }}
+              />
+              <span
+                className="text-xs font-mono uppercase tracking-widest"
+                style={{ color: DIFFICULTY_COLORS[d.difficulty] }}
+              >
+                {d.difficulty}
+              </span>
+            </span>
             <span
               className="text-xs font-mono uppercase tracking-widest"
-              style={{ color: DIFFICULTY_COLORS[d.difficulty] }}
+              style={{ color: "var(--c-text2)" }}
             >
-              {d.difficulty}
+              ×{d.scienceMultiplier}{" "}
+              <span style={{ color: "var(--c-text3)" }}>sci</span>
             </span>
-          </p>
+            {d.isruViability && (
+              <span className="flex items-center gap-1.5">
+                <span
+                  className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
+                  style={{ background: ISRU_COLORS[d.isruViability] }}
+                />
+                <span
+                  className="text-xs font-mono uppercase tracking-widest"
+                  style={{ color: ISRU_COLORS[d.isruViability] }}
+                >
+                  {d.isruViability === "prime" ? "ISRU prime" : "ISRU"}
+                </span>
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Toggle switches */}
