@@ -8,6 +8,11 @@ import {
   KERBIN_GRAVITY,
   type Leg,
 } from "@/lib/deltav-data";
+import {
+  DESTINATION_TIPS,
+  TIP_CATEGORY_LABELS,
+  type TipCategory,
+} from "@/lib/destination-tips";
 
 interface Props {
   destinationId: string | null;
@@ -106,6 +111,8 @@ function LegBar({
   );
 }
 
+const CATEGORY_ORDER: TipCategory[] = ["vessel", "terrain", "lore", "egg"];
+
 export default function MissionPanel({
   destinationId,
   isReturn,
@@ -117,6 +124,9 @@ export default function MissionPanel({
   redundancy,
   onRedundancyChange,
 }: Props) {
+  // ── Field notes toggle ────────────────────────────────────────────────────
+  const [showNotes, setShowNotes] = useState(false);
+
   // ── Typewriter for destination name ──────────────────────────────────────
   const [displayedName, setDisplayedName] = useState("");
   useEffect(() => {
@@ -428,6 +438,66 @@ export default function MissionPanel({
             m/s
           </p>
         </div>
+
+        {/* Field Notes */}
+        {DESTINATION_TIPS[d.id] && (
+          <div style={{ borderTop: `1px solid ${color}30` }}>
+            <button
+              onClick={() => setShowNotes((v) => !v)}
+              className="flex items-center justify-between w-full pt-4 pb-1 cursor-pointer"
+            >
+              <span
+                className="text-xs font-mono uppercase tracking-widest"
+                style={{ color: showNotes ? color : "var(--c-text3)" }}
+              >
+                Field Notes
+              </span>
+              <span
+                className="text-xs font-mono"
+                style={{ color: showNotes ? color : "var(--c-text3)" }}
+              >
+                {showNotes ? "▲" : "▼"}
+              </span>
+            </button>
+
+            {showNotes && (
+              <div className="flex flex-col gap-4 pt-3">
+                {CATEGORY_ORDER.map((cat) => {
+                  const tips = DESTINATION_TIPS[d.id].filter((t) => t.category === cat);
+                  if (!tips.length) return null;
+                  return (
+                    <div key={cat}>
+                      <p
+                        className="text-xs font-mono uppercase tracking-widest mb-2"
+                        style={{ color: color, opacity: 0.6 }}
+                      >
+                        {TIP_CATEGORY_LABELS[cat]}
+                      </p>
+                      <ul className="flex flex-col gap-2">
+                        {tips.map((tip, i) => (
+                          <li key={i} className="flex gap-2">
+                            <span
+                              className="text-xs font-mono flex-shrink-0 mt-0.5"
+                              style={{ color: color, opacity: 0.5 }}
+                            >
+                              ›
+                            </span>
+                            <span
+                              className="text-xs font-mono leading-relaxed"
+                              style={{ color: "var(--c-text2)" }}
+                            >
+                              {tip.text}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
         <p
           className="text-xs font-mono leading-relaxed"
