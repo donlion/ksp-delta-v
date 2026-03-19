@@ -24,7 +24,7 @@ interface EdgeDef {
 }
 
 // ── Node positions ────────────────────────────────────────────────────────────
-// SVG viewBox: 0 0 920 570
+// Stock SVG viewBox: 0 0 920 570  |  OPM viewBox: 0 0 1600 570
 const NODES: Record<string, NodeDef> = {
   // Spine
   kerbin:   { x: 460, y: 538, label: "Kerbin",  r: 18, stroke: "#4070d0", labelDir: "below" },
@@ -53,8 +53,35 @@ const NODES: Record<string, NodeDef> = {
   bop:      { x: 838, y: 303, label: "Bop",     r: 11, stroke: "#806040", labelDir: "right" },
   pol:      { x: 818, y: 383, label: "Pol",     r: 10, stroke: "#c0a060", labelDir: "right" },
 
-  // Outer system
+  // Outer system (stock only)
   eeloo:    { x: 718, y: 428, label: "Eeloo",   r: 12, stroke: "#a0c0e0" },
+};
+
+// ── OPM-only node positions ──────────────────────────────────────────────────
+const OPM_NODES: Record<string, NodeDef> = {
+  // Sarnus system
+  sarnus:      { x: 1020, y: 245, label: "Sarnus", r: 16, stroke: "#c8b470", labelDir: "above" },
+  tekto:       { x: 1100, y:  80, label: "Tekto",  r: 11, stroke: "#5090a8", labelDir: "above" },
+  slate:       { x: 1120, y: 145, label: "Slate",  r: 13, stroke: "#708090", labelDir: "right" },
+  "eeloo-opm": { x: 1115, y: 215, label: "Eeloo",  r: 12, stroke: "#a0c0e0", labelDir: "right" },
+  ovok:        { x: 1105, y: 300, label: "Ovok",   r:  9, stroke: "#c8b080", labelDir: "right" },
+  hale:        { x: 1090, y: 360, label: "Hale",   r:  7, stroke: "#a08060", labelDir: "right" },
+
+  // Plock system
+  plock:       { x: 1070, y: 450, label: "Plock",  r: 10, stroke: "#c8c0d8", labelDir: "below" },
+  karen:       { x: 1140, y: 450, label: "Karen",  r:  7, stroke: "#d0c0b8", labelDir: "right" },
+
+  // Urlum system
+  urlum:       { x: 1265, y: 255, label: "Urlum",  r: 15, stroke: "#60a8c0", labelDir: "above" },
+  polta:       { x: 1340, y: 175, label: "Polta",  r: 10, stroke: "#90a8b8", labelDir: "right" },
+  priax:       { x: 1355, y: 255, label: "Priax",  r:  9, stroke: "#a0b0c0", labelDir: "right" },
+  wal:         { x: 1345, y: 340, label: "Wal",    r: 12, stroke: "#7090a8", labelDir: "right" },
+  tal:         { x: 1410, y: 375, label: "Tal",    r:  7, stroke: "#98b0c0", labelDir: "right" },
+
+  // Neidon system
+  neidon:      { x: 1460, y: 210, label: "Neidon", r: 15, stroke: "#4060c0", labelDir: "above" },
+  thatmo:      { x: 1530, y: 145, label: "Thatmo", r: 11, stroke: "#607888", labelDir: "right" },
+  nissee:      { x: 1545, y: 260, label: "Nissee", r:  7, stroke: "#b0b8c8", labelDir: "right" },
 };
 
 // ── Edge connections ──────────────────────────────────────────────────────────
@@ -84,15 +111,51 @@ const EDGES: EdgeDef[] = [
   { from: "jool",     to: "vall",     color: "#60b0b0", width: 1.5, dvLabel: "1,380", labelAt: 0.45 },
   { from: "jool",     to: "bop",      color: "#806040", width: 1.5, dvLabel: "3,100", labelAt: 0.45 },
   { from: "jool",     to: "pol",      color: "#c0a060", width: 1.5, dvLabel: "3,640", labelAt: 0.45 },
+];
 
-  // Outer system
+// Stock-only edges (hidden in OPM mode)
+const STOCK_EDGES: EdgeDef[] = [
   { from: "transfer", to: "eeloo",    color: "#a0c0e0", width: 2,   dvLabel: "3,100", labelAt: 0.4 },
 ];
 
-// Selectable destinations
-const DESTINATIONS = new Set([
+// OPM-only edges
+const OPM_EDGES: EdgeDef[] = [
+  // Sarnus system
+  { from: "transfer", to: "sarnus",      color: "#c8b470", width: 2.5, dvLabel: "2,420", labelAt: 0.6 },
+  { from: "sarnus",   to: "tekto",       color: "#5090a8", width: 1.5, dvLabel: "820" },
+  { from: "sarnus",   to: "slate",       color: "#708090", width: 1.5, dvLabel: "1,000" },
+  { from: "sarnus",   to: "eeloo-opm",   color: "#a0c0e0", width: 1.5, dvLabel: "1,480" },
+  { from: "sarnus",   to: "ovok",        color: "#c8b080", width: 1.5, dvLabel: "1,160" },
+  { from: "sarnus",   to: "hale",        color: "#a08060", width: 1.5, dvLabel: "1,520" },
+  // Plock system
+  { from: "transfer", to: "plock",       color: "#c8c0d8", width: 2,   dvLabel: "3,340", labelAt: 0.55 },
+  { from: "plock",    to: "karen",       color: "#d0c0b8", width: 1.5, dvLabel: "130" },
+  // Urlum system
+  { from: "transfer", to: "urlum",       color: "#60a8c0", width: 2.5, dvLabel: "4,360", labelAt: 0.62 },
+  { from: "urlum",    to: "polta",       color: "#90a8b8", width: 1.5, dvLabel: "780" },
+  { from: "urlum",    to: "priax",       color: "#a0b0c0", width: 1.5, dvLabel: "790" },
+  { from: "urlum",    to: "wal",         color: "#7090a8", width: 1.5, dvLabel: "1,480" },
+  { from: "wal",      to: "tal",         color: "#98b0c0", width: 1.5, dvLabel: "330" },
+  // Neidon system
+  { from: "transfer", to: "neidon",      color: "#4060c0", width: 2.5, dvLabel: "4,900", labelAt: 0.65 },
+  { from: "neidon",   to: "thatmo",      color: "#607888", width: 1.5, dvLabel: "1,310" },
+  { from: "neidon",   to: "nissee",      color: "#b0b8c8", width: 1.5, dvLabel: "1,410" },
+];
+
+// Selectable destinations (stock)
+const STOCK_DESTINATIONS = new Set([
   "mun", "minmus", "moho", "eve", "gilly", "duna", "ike",
   "dres", "jool", "laythe", "tylo", "vall", "bop", "pol", "eeloo",
+]);
+
+// Selectable destinations (OPM — replaces eeloo with eeloo-opm, adds rest)
+const OPM_DESTINATIONS = new Set([
+  "mun", "minmus", "moho", "eve", "gilly", "duna", "ike",
+  "dres", "jool", "laythe", "tylo", "vall", "bop", "pol",
+  "sarnus", "slate", "tekto", "ovok", "hale", "eeloo-opm",
+  "plock", "karen",
+  "urlum", "polta", "priax", "wal", "tal",
+  "neidon", "thatmo", "nissee",
 ]);
 
 function labelPos(node: NodeDef): { x: number; y: number; anchor: "middle" | "start" | "end" } {
@@ -108,25 +171,34 @@ function labelPos(node: NodeDef): { x: number; y: number; anchor: "middle" | "st
 interface Props {
   selected: string | null;
   onSelect: (id: string) => void;
+  opmEnabled: boolean;
 }
 
-export default function DeltaVMap({ selected, onSelect }: Props) {
+export default function DeltaVMap({ selected, onSelect, opmEnabled }: Props) {
   const [hovered, setHovered] = useState<string | null>(null);
   const [bloomed, setBloomed] = useState<Set<string>>(new Set());
 
+  const allNodes = opmEnabled ? { ...NODES, ...OPM_NODES } : NODES;
+  const activeEdges = opmEnabled
+    ? [...EDGES, ...OPM_EDGES]
+    : [...EDGES, ...STOCK_EDGES];
+  const selectableIds = opmEnabled ? OPM_DESTINATIONS : STOCK_DESTINATIONS;
+
   // Staggered colour bloom on mount — systems coming online
   useEffect(() => {
-    const ids = Object.keys(NODES);
+    const ids = Object.keys(allNodes);
     ids.forEach((id, i) => {
       setTimeout(() => setBloomed((prev) => new Set([...prev, id])), i * 110);
     });
-  }, []);
+  }, [opmEnabled]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const viewBox = opmEnabled ? "0 0 1600 570" : "0 0 920 570";
 
   return (
     <svg
-      viewBox="0 0 920 570"
+      viewBox={viewBox}
       className="select-none"
-      style={{ width: "100%", minWidth: 760 }}
+      style={{ width: "100%", minWidth: opmEnabled ? 1100 : 760 }}
       aria-label="KSP Delta-V map"
     >
       <defs>
@@ -139,9 +211,9 @@ export default function DeltaVMap({ selected, onSelect }: Props) {
       <rect width="100%" height="100%" fill="url(#dot-grid)" />
 
       {/* ── Edges ── */}
-      {EDGES.map((edge, i) => {
-        const f = NODES[edge.from];
-        const t = NODES[edge.to];
+      {activeEdges.map((edge, i) => {
+        const f = allNodes[edge.from];
+        const t = allNodes[edge.to];
         if (!f || !t) return null;
 
         const p = edge.labelAt ?? 0.5;
@@ -184,8 +256,8 @@ export default function DeltaVMap({ selected, onSelect }: Props) {
       })}
 
       {/* ── Nodes ── */}
-      {Object.entries(NODES).map(([id, node]) => {
-        const isDest    = DESTINATIONS.has(id);
+      {Object.entries(allNodes).map(([id, node]) => {
+        const isDest    = selectableIds.has(id);
         const isSel     = selected === id;
         const isHov     = hovered  === id;
         const lp        = labelPos(node);

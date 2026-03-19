@@ -12,7 +12,11 @@ export type DestinationGroup =
   | "Inner Planets"
   | "Middle System"
   | "Jool System"
-  | "Outer System";
+  | "Outer System"
+  | "Sarnus System"
+  | "Urlum System"
+  | "Neidon System"
+  | "Plock System";
 
 export type DifficultyRating = "Beginner" | "Intermediate" | "Advanced" | "Expert";
 export type IsruViability = "prime" | "viable";
@@ -35,6 +39,10 @@ export interface Destination {
   name: string;
   group: DestinationGroup;
   description: string;
+  /** Only shown when OPM is disabled (replaced by OPM equivalent) */
+  stockOnly?: boolean;
+  /** Only shown when OPM is enabled */
+  opmOnly?: boolean;
   /** Rough mission difficulty based on delta-v, atmosphere, and landing complexity */
   difficulty: DifficultyRating;
   /** Surface gravity in m/s². Omit for Jool (gas giant, no surface). */
@@ -362,6 +370,7 @@ export const DESTINATIONS: Destination[] = [
     id: "eeloo",
     name: "Eeloo",
     group: "Outer System",
+    stockOnly: true,
     difficulty: "Advanced",
     description:
       "Icy dwarf planet at the edge of the solar system. No atmosphere.",
@@ -375,6 +384,317 @@ export const DESTINATIONS: Destination[] = [
       { from: "Low Eeloo Orbit", to: "Eeloo Surface", deltaV: 620 },
     ],
   },
+
+  // ── Outer Planets Mod ─────────────────────────────────────────────────────
+  // Sarnus System
+  {
+    id: "sarnus",
+    name: "Sarnus",
+    group: "Sarnus System",
+    opmOnly: true,
+    difficulty: "Expert",
+    description:
+      "Ringed gas giant beyond Jool. No surface — thick atmosphere allows aerobraking into orbit.",
+    scienceMultiplier: 12,
+    legs: [
+      { from: "Kerbin Surface",   to: "Low Kerbin Orbit",  deltaV: 3400 },
+      { from: "Low Kerbin Orbit", to: "Sarnus Transfer",   deltaV: 1020 },
+      { from: "Sarnus SOI Entry", to: "Low Sarnus Orbit",  deltaV: 1400, canAerobrake: true },
+    ],
+  },
+  {
+    id: "slate",
+    name: "Slate",
+    group: "Sarnus System",
+    opmOnly: true,
+    difficulty: "Expert",
+    description:
+      "Large rocky moon of Sarnus with no atmosphere and strong gravity — the Tylo of the outer system.",
+    surfaceGravity: 5.5,
+    scienceMultiplier: 15,
+    isruViability: "viable",
+    legs: [
+      { from: "Kerbin Surface",   to: "Low Kerbin Orbit",  deltaV: 3400 },
+      { from: "Low Kerbin Orbit", to: "Sarnus Transfer",   deltaV: 1020 },
+      { from: "Sarnus SOI Entry", to: "Low Sarnus Orbit",  deltaV: 1400, canAerobrake: true },
+      { from: "Low Sarnus Orbit", to: "Slate Transfer",    deltaV: 480 },
+      { from: "Slate Transfer",   to: "Low Slate Orbit",   deltaV: 520 },
+      { from: "Low Slate Orbit",  to: "Slate Surface",     deltaV: 810 },
+    ],
+  },
+  {
+    id: "tekto",
+    name: "Tekto",
+    group: "Sarnus System",
+    opmOnly: true,
+    difficulty: "Expert",
+    description:
+      "Outermost moon of Sarnus with a thick hazy atmosphere. Jet engines won't work, but parachutes will.",
+    surfaceGravity: 2.94,
+    scienceMultiplier: 12,
+    isruViability: "viable",
+    legs: [
+      { from: "Kerbin Surface",   to: "Low Kerbin Orbit",  deltaV: 3400 },
+      { from: "Low Kerbin Orbit", to: "Sarnus Transfer",   deltaV: 1020 },
+      { from: "Sarnus SOI Entry", to: "Low Sarnus Orbit",  deltaV: 1400, canAerobrake: true },
+      { from: "Low Sarnus Orbit", to: "Tekto Transfer",    deltaV: 620 },
+      { from: "Tekto Transfer",   to: "Low Tekto Orbit",   deltaV: 200, canAerobrake: true },
+      { from: "Low Tekto Orbit",  to: "Tekto Surface",     deltaV: 1400, canAerobrake: true },
+    ],
+  },
+  {
+    id: "ovok",
+    name: "Ovok",
+    group: "Sarnus System",
+    opmOnly: true,
+    difficulty: "Advanced",
+    description:
+      "Small egg-shaped moon of Sarnus. Low gravity makes landing trivial but staying on the surface tricky.",
+    surfaceGravity: 0.49,
+    scienceMultiplier: 18,
+    isruViability: "prime",
+    legs: [
+      { from: "Kerbin Surface",   to: "Low Kerbin Orbit",  deltaV: 3400 },
+      { from: "Low Kerbin Orbit", to: "Sarnus Transfer",   deltaV: 1020 },
+      { from: "Sarnus SOI Entry", to: "Low Sarnus Orbit",  deltaV: 1400, canAerobrake: true },
+      { from: "Low Sarnus Orbit", to: "Ovok Transfer",     deltaV: 1060 },
+      { from: "Ovok Transfer",    to: "Low Ovok Orbit",    deltaV: 100 },
+      { from: "Low Ovok Orbit",   to: "Ovok Surface",      deltaV: 50 },
+    ],
+  },
+  {
+    id: "hale",
+    name: "Hale",
+    group: "Sarnus System",
+    opmOnly: true,
+    difficulty: "Advanced",
+    description:
+      "Tiny innermost moon of Sarnus. Negligible gravity — a gentle push can reach orbit from the surface.",
+    surfaceGravity: 0.1,
+    scienceMultiplier: 18,
+    isruViability: "prime",
+    legs: [
+      { from: "Kerbin Surface",   to: "Low Kerbin Orbit",  deltaV: 3400 },
+      { from: "Low Kerbin Orbit", to: "Sarnus Transfer",   deltaV: 1020 },
+      { from: "Sarnus SOI Entry", to: "Low Sarnus Orbit",  deltaV: 1400, canAerobrake: true },
+      { from: "Low Sarnus Orbit", to: "Hale Transfer",     deltaV: 1500 },
+      { from: "Hale Transfer",    to: "Low Hale Orbit",    deltaV: 20 },
+      { from: "Low Hale Orbit",   to: "Hale Surface",      deltaV: 10 },
+    ],
+  },
+  {
+    id: "eeloo-opm",
+    name: "Eeloo",
+    group: "Sarnus System",
+    opmOnly: true,
+    difficulty: "Expert",
+    description:
+      "Former outer planet, now a captured icy moon of Sarnus. No atmosphere — efficient ISRU candidate.",
+    surfaceGravity: 1.69,
+    scienceMultiplier: 10,
+    isruViability: "viable",
+    legs: [
+      { from: "Kerbin Surface",   to: "Low Kerbin Orbit",  deltaV: 3400 },
+      { from: "Low Kerbin Orbit", to: "Sarnus Transfer",   deltaV: 1020 },
+      { from: "Sarnus SOI Entry", to: "Low Sarnus Orbit",  deltaV: 1400, canAerobrake: true },
+      { from: "Low Sarnus Orbit", to: "Eeloo Transfer",    deltaV: 650 },
+      { from: "Eeloo Transfer",   to: "Low Eeloo Orbit",   deltaV: 830 },
+      { from: "Low Eeloo Orbit",  to: "Eeloo Surface",     deltaV: 620 },
+    ],
+  },
+
+  // Urlum System
+  {
+    id: "urlum",
+    name: "Urlum",
+    group: "Urlum System",
+    opmOnly: true,
+    difficulty: "Expert",
+    description:
+      "Tilted ice giant with a ring system. Its extreme axial tilt makes polar orbits unusual.",
+    scienceMultiplier: 14,
+    legs: [
+      { from: "Kerbin Surface",   to: "Low Kerbin Orbit",  deltaV: 3400 },
+      { from: "Low Kerbin Orbit", to: "Urlum Transfer",    deltaV: 2310 },
+      { from: "Urlum SOI Entry",  to: "Low Urlum Orbit",   deltaV: 2050, canAerobrake: true },
+    ],
+  },
+  {
+    id: "polta",
+    name: "Polta",
+    group: "Urlum System",
+    opmOnly: true,
+    difficulty: "Expert",
+    description:
+      "Innermost moon of Urlum. Rocky, airless, and very far from home.",
+    surfaceGravity: 2.0,
+    scienceMultiplier: 16,
+    isruViability: "viable",
+    legs: [
+      { from: "Kerbin Surface",   to: "Low Kerbin Orbit",  deltaV: 3400 },
+      { from: "Low Kerbin Orbit", to: "Urlum Transfer",    deltaV: 2310 },
+      { from: "Urlum SOI Entry",  to: "Low Urlum Orbit",   deltaV: 2050, canAerobrake: true },
+      { from: "Low Urlum Orbit",  to: "Polta Transfer",    deltaV: 520 },
+      { from: "Polta Transfer",   to: "Low Polta Orbit",   deltaV: 260 },
+      { from: "Low Polta Orbit",  to: "Polta Surface",     deltaV: 200 },
+    ],
+  },
+  {
+    id: "priax",
+    name: "Priax",
+    group: "Urlum System",
+    opmOnly: true,
+    difficulty: "Expert",
+    description:
+      "Small companion moon to Polta, sharing a similar orbit around Urlum.",
+    surfaceGravity: 1.5,
+    scienceMultiplier: 16,
+    isruViability: "viable",
+    legs: [
+      { from: "Kerbin Surface",   to: "Low Kerbin Orbit",  deltaV: 3400 },
+      { from: "Low Kerbin Orbit", to: "Urlum Transfer",    deltaV: 2310 },
+      { from: "Urlum SOI Entry",  to: "Low Urlum Orbit",   deltaV: 2050, canAerobrake: true },
+      { from: "Low Urlum Orbit",  to: "Priax Transfer",    deltaV: 590 },
+      { from: "Priax Transfer",   to: "Low Priax Orbit",   deltaV: 200 },
+      { from: "Low Priax Orbit",  to: "Priax Surface",     deltaV: 140 },
+    ],
+  },
+  {
+    id: "wal",
+    name: "Wal",
+    group: "Urlum System",
+    opmOnly: true,
+    difficulty: "Expert",
+    description:
+      "Largest moon of Urlum. Significant gravity and no atmosphere — and hosts its own subsatellite, Tal.",
+    surfaceGravity: 4.9,
+    scienceMultiplier: 15,
+    isruViability: "viable",
+    legs: [
+      { from: "Kerbin Surface",   to: "Low Kerbin Orbit",  deltaV: 3400 },
+      { from: "Low Kerbin Orbit", to: "Urlum Transfer",    deltaV: 2310 },
+      { from: "Urlum SOI Entry",  to: "Low Urlum Orbit",   deltaV: 2050, canAerobrake: true },
+      { from: "Low Urlum Orbit",  to: "Wal Transfer",      deltaV: 980 },
+      { from: "Wal Transfer",     to: "Low Wal Orbit",     deltaV: 500 },
+      { from: "Low Wal Orbit",    to: "Wal Surface",       deltaV: 1100 },
+    ],
+  },
+  {
+    id: "tal",
+    name: "Tal",
+    group: "Urlum System",
+    opmOnly: true,
+    difficulty: "Expert",
+    description:
+      "Tiny moon of Wal — a moon of a moon. Exceptionally rare; one of very few subsatellites in the Kerbol system.",
+    surfaceGravity: 0.2,
+    scienceMultiplier: 20,
+    isruViability: "prime",
+    legs: [
+      { from: "Kerbin Surface",   to: "Low Kerbin Orbit",  deltaV: 3400 },
+      { from: "Low Kerbin Orbit", to: "Urlum Transfer",    deltaV: 2310 },
+      { from: "Urlum SOI Entry",  to: "Low Urlum Orbit",   deltaV: 2050, canAerobrake: true },
+      { from: "Low Urlum Orbit",  to: "Wal Transfer",      deltaV: 980 },
+      { from: "Wal Transfer",     to: "Low Wal Orbit",     deltaV: 500 },
+      { from: "Low Wal Orbit",    to: "Tal Transfer",      deltaV: 300 },
+      { from: "Tal Transfer",     to: "Tal Surface",       deltaV: 30 },
+    ],
+  },
+
+  // Neidon System
+  {
+    id: "neidon",
+    name: "Neidon",
+    group: "Neidon System",
+    opmOnly: true,
+    difficulty: "Expert",
+    description:
+      "Deep-blue ice giant at the far edge of the Kerbol system. Capturing into orbit is extremely expensive.",
+    scienceMultiplier: 16,
+    legs: [
+      { from: "Kerbin Surface",   to: "Low Kerbin Orbit",  deltaV: 3400 },
+      { from: "Low Kerbin Orbit", to: "Neidon Transfer",   deltaV: 2040 },
+      { from: "Neidon SOI Entry", to: "Low Neidon Orbit",  deltaV: 2860, canAerobrake: true },
+    ],
+  },
+  {
+    id: "thatmo",
+    name: "Thatmo",
+    group: "Neidon System",
+    opmOnly: true,
+    difficulty: "Expert",
+    description:
+      "Large retrograde moon of Neidon with a thick nitrogen atmosphere. Parachutes work, ascent is costly.",
+    surfaceGravity: 6.87,
+    scienceMultiplier: 18,
+    isruViability: "viable",
+    legs: [
+      { from: "Kerbin Surface",    to: "Low Kerbin Orbit",   deltaV: 3400 },
+      { from: "Low Kerbin Orbit",  to: "Neidon Transfer",    deltaV: 2040 },
+      { from: "Neidon SOI Entry",  to: "Low Neidon Orbit",   deltaV: 2860, canAerobrake: true },
+      { from: "Low Neidon Orbit",  to: "Thatmo Transfer",    deltaV: 650 },
+      { from: "Thatmo Transfer",   to: "Low Thatmo Orbit",   deltaV: 660, canAerobrake: true },
+      { from: "Low Thatmo Orbit",  to: "Thatmo Surface",     deltaV: 1600, canAerobrake: true },
+    ],
+  },
+  {
+    id: "nissee",
+    name: "Nissee",
+    group: "Neidon System",
+    opmOnly: true,
+    difficulty: "Expert",
+    description:
+      "Tiny captured irregular moon of Neidon in a highly inclined orbit. Negligible gravity.",
+    surfaceGravity: 0.1,
+    scienceMultiplier: 20,
+    isruViability: "prime",
+    legs: [
+      { from: "Kerbin Surface",   to: "Low Kerbin Orbit",   deltaV: 3400 },
+      { from: "Low Kerbin Orbit", to: "Neidon Transfer",    deltaV: 2040 },
+      { from: "Neidon SOI Entry", to: "Low Neidon Orbit",   deltaV: 2860, canAerobrake: true },
+      { from: "Low Neidon Orbit", to: "Nissee Transfer",    deltaV: 1380 },
+      { from: "Nissee Transfer",  to: "Nissee Surface",     deltaV: 30 },
+    ],
+  },
+
+  // Plock System
+  {
+    id: "plock",
+    name: "Plock",
+    group: "Plock System",
+    opmOnly: true,
+    difficulty: "Expert",
+    description:
+      "Icy dwarf planet in an eccentric outer orbit, locked in a binary dance with its companion Karen.",
+    surfaceGravity: 2.2,
+    scienceMultiplier: 18,
+    isruViability: "viable",
+    legs: [
+      { from: "Kerbin Surface",   to: "Low Kerbin Orbit",  deltaV: 3400 },
+      { from: "Low Kerbin Orbit", to: "Plock Transfer",    deltaV: 2180 },
+      { from: "Plock Transfer",   to: "Low Plock Orbit",   deltaV: 1160 },
+      { from: "Low Plock Orbit",  to: "Plock Surface",     deltaV: 220 },
+    ],
+  },
+  {
+    id: "karen",
+    name: "Karen",
+    group: "Plock System",
+    opmOnly: true,
+    difficulty: "Expert",
+    description:
+      "Binary companion to Plock, nearly half its size. The two are tidally locked, always facing each other.",
+    surfaceGravity: 0.3,
+    scienceMultiplier: 20,
+    isruViability: "prime",
+    legs: [
+      { from: "Kerbin Surface",   to: "Low Kerbin Orbit",  deltaV: 3400 },
+      { from: "Low Kerbin Orbit", to: "Plock Transfer",    deltaV: 2180 },
+      { from: "Plock Transfer",   to: "Low Plock Orbit",   deltaV: 1160 },
+      { from: "Low Plock Orbit",  to: "Karen Transfer",    deltaV: 100 },
+      { from: "Karen Transfer",   to: "Karen Surface",     deltaV: 30 },
+    ],
+  },
 ];
 
 export const DESTINATION_GROUPS: DestinationGroup[] = [
@@ -383,25 +703,46 @@ export const DESTINATION_GROUPS: DestinationGroup[] = [
   "Middle System",
   "Jool System",
   "Outer System",
+  "Sarnus System",
+  "Urlum System",
+  "Neidon System",
+  "Plock System",
 ];
 
 /** Per-body accent colors (matches DeltaVMap node strokes) */
 export const BODY_COLORS: Record<string, string> = {
-  mun:    "#909090",
-  minmus: "#50a060",
-  moho:   "#c8a050",
-  eve:    "#8050c0",
-  gilly:  "#a070d0",
-  duna:   "#c04040",
-  ike:    "#808080",
-  dres:   "#a0a0a0",
-  jool:   "#40a030",
-  laythe: "#4080c0",
-  tylo:   "#c0c080",
-  vall:   "#60b0b0",
-  bop:    "#806040",
-  pol:    "#c0a060",
-  eeloo:  "#a0c0e0",
+  mun:        "#909090",
+  minmus:     "#50a060",
+  moho:       "#c8a050",
+  eve:        "#8050c0",
+  gilly:      "#a070d0",
+  duna:       "#c04040",
+  ike:        "#808080",
+  dres:       "#a0a0a0",
+  jool:       "#40a030",
+  laythe:     "#4080c0",
+  tylo:       "#c0c080",
+  vall:       "#60b0b0",
+  bop:        "#806040",
+  pol:        "#c0a060",
+  eeloo:      "#a0c0e0",
+  // OPM
+  sarnus:     "#c8b470",
+  slate:      "#708090",
+  tekto:      "#5090a8",
+  ovok:       "#c8b080",
+  hale:       "#a08060",
+  "eeloo-opm": "#a0c0e0",
+  plock:      "#c8c0d8",
+  karen:      "#d0c0b8",
+  urlum:      "#60a8c0",
+  polta:      "#90a8b8",
+  priax:      "#a0b0c0",
+  wal:        "#7090a8",
+  tal:        "#98b0c0",
+  neidon:     "#4060c0",
+  thatmo:     "#607888",
+  nissee:     "#b0b8c8",
 };
 
 /**

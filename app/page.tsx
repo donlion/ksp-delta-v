@@ -5,6 +5,7 @@ import DeltaVMap from "@/components/DeltaVMap";
 import BodyList from "@/components/BodyList";
 import MissionPanel from "@/components/MissionPanel";
 import ThemeToggle from "@/components/ThemeToggle";
+import SettingsToggle from "@/components/SettingsToggle";
 import { DESTINATIONS } from "@/lib/deltav-data";
 
 /** Four L-shaped corner brackets in HAL red */
@@ -54,12 +55,36 @@ export default function Home() {
   const [fromLKO, setFromLKO] = useState(false);
   const [orbitOnly, setOrbitOnly] = useState(false);
   const [redundancy, setRedundancy] = useState(0);
+  const [opmEnabled, setOpmEnabled] = useState(false);
 
-  // ── Read URL params on mount ───────────────────────────────────────────────
+  const activeDestinations = DESTINATIONS.filter((d) =>
+    opmEnabled ? !d.stockOnly : !d.opmOnly
+  );
+
+  function handleOpmToggle(enabled: boolean) {
+    setOpmEnabled(enabled);
+    localStorage.setItem("ksp-opm", enabled ? "1" : "0");
+    // Swap Eeloo between stock and OPM versions seamlessly
+    if (enabled && selected === "eeloo") setSelected("eeloo-opm");
+    if (!enabled && selected === "eeloo-opm") setSelected("eeloo");
+    // Deselect any other OPM-only destination when turning off
+    if (!enabled) {
+      const dest = DESTINATIONS.find((d) => d.id === selected);
+      if (dest?.opmOnly && dest.id !== "eeloo-opm") setSelected(null);
+    }
+  }
+
+  // ── Read URL params + localStorage on mount ────────────────────────────────
   useEffect(() => {
+    const opmStored = localStorage.getItem("ksp-opm");
+    const opm = opmStored === "1";
+    if (opm) setOpmEnabled(true);
+
     const params = new URLSearchParams(window.location.search);
     const d = params.get("d");
-    if (d && DESTINATIONS.find((dest) => dest.id === d)) setSelected(d);
+    if (d && DESTINATIONS.find((dest) => dest.id === d && (opm ? !dest.stockOnly : !dest.opmOnly))) {
+      setSelected(d);
+    }
     if (params.get("r") === "1") setIsReturn(true);
     if (params.get("lko") === "1") setFromLKO(true);
     if (params.get("orb") === "1") setOrbitOnly(true);
@@ -81,7 +106,7 @@ export default function Home() {
 
   // ── Keyboard navigation ───────────────────────────────────────────────────
   useEffect(() => {
-    const ids = DESTINATIONS.map((d) => d.id);
+    const ids = activeDestinations.map((d) => d.id);
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         e.preventDefault();
@@ -99,7 +124,7 @@ export default function Home() {
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, []);
+  }, [activeDestinations]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
@@ -114,7 +139,10 @@ export default function Home() {
               Mission Delta‑V Planner · Kerbal Space Program 1
             </p>
           </div>
-          <ThemeToggle />
+          <div className="flex items-start gap-2">
+            <SettingsToggle opmEnabled={opmEnabled} onToggleOpm={handleOpmToggle} />
+            <ThemeToggle />
+          </div>
         </header>
 
         {/* Separator */}
@@ -182,7 +210,7 @@ export default function Home() {
             >
               {mapView === "map" ? (
                 <>
-                  <DeltaVMap selected={selected} onSelect={setSelected} />
+                  <DeltaVMap selected={selected} onSelect={setSelected} opmEnabled={opmEnabled} />
                   {/* CRT vignette */}
                   <div
                     className="map-vignette"
@@ -202,7 +230,7 @@ export default function Home() {
                   </p>
                 </>
               ) : (
-                <BodyList selected={selected} onSelect={setSelected} />
+                <BodyList selected={selected} onSelect={setSelected} opmEnabled={opmEnabled} />
               )}
             </div>
           </div>
