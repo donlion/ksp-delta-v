@@ -33,15 +33,18 @@ function ToggleSwitch({
   onClick,
   label,
   color,
+  title,
 }: {
   active: boolean;
   onClick: () => void;
   label: string;
   color: string;
+  title?: string;
 }) {
   return (
     <button
       onClick={onClick}
+      title={title}
       className="flex flex-col items-center gap-1.5 cursor-pointer group"
     >
       <div
@@ -329,7 +332,10 @@ export default function MissionPanel({
             </p>
           )}
           <div className="flex items-center gap-4 mt-2 flex-wrap">
-            <span className="flex items-center gap-1.5">
+            <span
+              className="flex items-center gap-1.5"
+              title={`Mission difficulty: ${d.difficulty}`}
+            >
               <span
                 className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
                 style={{ background: DIFFICULTY_COLORS[d.difficulty] }}
@@ -344,12 +350,20 @@ export default function MissionPanel({
             <span
               className="text-xs font-mono uppercase tracking-widest"
               style={{ color: "var(--c-text2)" }}
+              title={`Science multiplier: ×${d.scienceMultiplier} — rewards from science experiments are multiplied by this value`}
             >
               ×{d.scienceMultiplier}{" "}
               <span style={{ color: "var(--c-text3)" }}>sci</span>
             </span>
             {d.isruViability && (
-              <span className="flex items-center gap-1.5">
+              <span
+                className="flex items-center gap-1.5"
+                title={
+                  d.isruViability === "prime"
+                    ? "ISRU prime — excellent in-situ resource utilisation site: ore is abundant and can be efficiently converted to fuel"
+                    : "ISRU viable — in-situ resource utilisation is possible here: ore can be mined and converted to fuel"
+                }
+              >
                 <span
                   className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
                   style={{ background: ISRU_COLORS[d.isruViability] }}
@@ -372,12 +386,14 @@ export default function MissionPanel({
             onClick={onToggleReturn}
             label="Return"
             color={color}
+            title="Return trip — include the delta-v needed to return back to Kerbin"
           />
           <ToggleSwitch
             active={fromLKO}
             onClick={onToggleFromLKO}
             label="From LKO"
             color={color}
+            title="From Low Kerbin Orbit — start the mission from LKO instead of Kerbin's surface (excludes the ~3,400 m/s launch cost)"
           />
           {!hasNoSurface && (
             <ToggleSwitch
@@ -385,6 +401,7 @@ export default function MissionPanel({
               onClick={onToggleOrbitOnly}
               label="Orbit only"
               color={color}
+              title="Orbit only — calculate delta-v for reaching orbit around the destination without landing on its surface"
             />
           )}
         </div>
@@ -394,6 +411,7 @@ export default function MissionPanel({
           <span
             className="text-xs font-mono uppercase tracking-widest w-14 flex-shrink-0"
             style={{ color: "var(--c-text3)" }}
+            title="Safety margin — adds extra delta-v as a percentage buffer above the calculated minimum"
           >
             Margin
           </span>
