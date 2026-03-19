@@ -72,26 +72,31 @@ export default function ThemeToggle() {
     <div ref={containerRef} className="flex items-start gap-2 flex-shrink-0">
 
       {/* HAL eye — dark/light toggle */}
-      <button
-        onClick={toggleMode}
-        className="hal-glow relative w-10 h-10 rounded-full flex items-center justify-center cursor-pointer flex-shrink-0 mt-0.5"
-        aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-        style={{
-          background: "radial-gradient(circle at 40% 38%, #3a0a08 0%, #0a0204 70%)",
-          border: `1.5px solid ${theme.accent}66`,
-        }}
-      >
-        <div className="absolute w-6 h-6 rounded-full"
-          style={{ border: `1px solid ${theme.accent}44` }} />
-        <div className="w-3.5 h-3.5 rounded-full"
+      <div className="flex flex-col items-center gap-0.5">
+        <button
+          onClick={toggleMode}
+          className="hal-glow relative w-10 h-10 rounded-full flex items-center justify-center cursor-pointer flex-shrink-0 mt-0.5"
+          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
           style={{
-            background: `radial-gradient(circle at 38% 35%, ${theme.accent} 0%, color-mix(in srgb, ${theme.accent} 60%, black) 55%, #3a0a06 100%)`,
-            boxShadow: `0 0 6px 2px ${theme.accent}80`,
-          }} />
-        <div className="absolute rounded-full"
-          style={{ width: 5, height: 3, background: "rgba(255,200,180,0.55)",
-            top: "26%", left: "30%", transform: "rotate(-15deg)", filter: "blur(0.5px)" }} />
-      </button>
+            background: "radial-gradient(circle at 40% 38%, #3a0a08 0%, #0a0204 70%)",
+            border: `1.5px solid ${theme.accent}66`,
+          }}
+        >
+          <div className="absolute w-6 h-6 rounded-full"
+            style={{ border: `1px solid ${theme.accent}44` }} />
+          <div className="w-3.5 h-3.5 rounded-full"
+            style={{
+              background: `radial-gradient(circle at 38% 35%, ${theme.accent} 0%, color-mix(in srgb, ${theme.accent} 60%, black) 55%, #3a0a06 100%)`,
+              boxShadow: `0 0 6px 2px ${theme.accent}80`,
+            }} />
+          <div className="absolute rounded-full"
+            style={{ width: 5, height: 3, background: "rgba(255,200,180,0.55)",
+              top: "26%", left: "30%", transform: "rotate(-15deg)", filter: "blur(0.5px)" }} />
+        </button>
+        <span className="font-mono uppercase tracking-widest select-none" style={{ fontSize: 8, color: "var(--c-text3)" }}>
+          {isDark ? "dark" : "light"}
+        </span>
+      </div>
 
       {/* Theme dropdown */}
       <div style={{ position: "relative" }}>

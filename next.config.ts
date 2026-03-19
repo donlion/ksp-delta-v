@@ -1,10 +1,12 @@
 import type { NextConfig } from "next";
 
+const isGithubPages = process.env.GITHUB_PAGES === "true";
+
 const nextConfig: NextConfig = {
-  output: "export",
-  basePath: "/ksp-delta-v",
+  output: isGithubPages ? "export" : undefined,
+  basePath: isGithubPages ? "/ksp-delta-v" : "",
   images: {
-    unoptimized: true,
+    unoptimized: isGithubPages,
   },
 };
 
