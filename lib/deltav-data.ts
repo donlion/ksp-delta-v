@@ -14,11 +14,23 @@ export type DestinationGroup =
   | "Jool System"
   | "Outer System";
 
+export type DifficultyRating = "Beginner" | "Intermediate" | "Advanced" | "Expert";
+
+/** Color for each difficulty tier */
+export const DIFFICULTY_COLORS: Record<DifficultyRating, string> = {
+  Beginner:     "#3a9a50",
+  Intermediate: "#c0a030",
+  Advanced:     "#c07030",
+  Expert:       "#bf2d1c",
+};
+
 export interface Destination {
   id: string;
   name: string;
   group: DestinationGroup;
   description: string;
+  /** Rough mission difficulty based on delta-v, atmosphere, and landing complexity */
+  difficulty: DifficultyRating;
   /** Surface gravity in m/s². Omit for Jool (gas giant, no surface). */
   surfaceGravity?: number;
   /** Legs from Kerbin Surface to destination surface (one-way) */
@@ -38,6 +50,7 @@ export const DESTINATIONS: Destination[] = [
     id: "mun",
     name: "Mun",
     group: "Kerbin System",
+    difficulty: "Beginner",
     description: "Kerbin's primary moon. No atmosphere, moderate gravity.",
     surfaceGravity: 1.63,
     legs: [
@@ -51,6 +64,7 @@ export const DESTINATIONS: Destination[] = [
     id: "minmus",
     name: "Minmus",
     group: "Kerbin System",
+    difficulty: "Beginner",
     description: "Kerbin's small outer moon. Very low gravity, great for fuel depots.",
     surfaceGravity: 0.491,
     legs: [
@@ -66,6 +80,7 @@ export const DESTINATIONS: Destination[] = [
     id: "moho",
     name: "Moho",
     group: "Inner Planets",
+    difficulty: "Expert",
     description: "Innermost planet. No atmosphere — expensive capture burn required.",
     surfaceGravity: 2.7,
     legs: [
@@ -79,6 +94,7 @@ export const DESTINATIONS: Destination[] = [
     id: "eve",
     name: "Eve",
     group: "Inner Planets",
+    difficulty: "Expert",
     description:
       "Purple planet with a crushing atmosphere. Returning from the surface is the hardest challenge in KSP.",
     surfaceGravity: 16.7,
@@ -103,6 +119,7 @@ export const DESTINATIONS: Destination[] = [
     id: "gilly",
     name: "Gilly",
     group: "Inner Planets",
+    difficulty: "Intermediate",
     description:
       "Tiny irregular moon of Eve. Almost no gravity — walking speed can exceed escape velocity.",
     surfaceGravity: 0.049,
@@ -126,6 +143,7 @@ export const DESTINATIONS: Destination[] = [
     id: "duna",
     name: "Duna",
     group: "Middle System",
+    difficulty: "Intermediate",
     description:
       "Mars-like red planet with a thin atmosphere. Parachutes work here.",
     surfaceGravity: 2.94,
@@ -150,6 +168,7 @@ export const DESTINATIONS: Destination[] = [
     id: "ike",
     name: "Ike",
     group: "Middle System",
+    difficulty: "Intermediate",
     description: "Duna's large moon. Very close to Duna — easy side trip.",
     surfaceGravity: 1.1,
     legs: [
@@ -170,6 +189,7 @@ export const DESTINATIONS: Destination[] = [
     id: "dres",
     name: "Dres",
     group: "Middle System",
+    difficulty: "Advanced",
     description:
       "Lonely asteroid-like dwarf planet in an inclined orbit. No moons, no atmosphere.",
     surfaceGravity: 1.13,
@@ -186,6 +206,7 @@ export const DESTINATIONS: Destination[] = [
     id: "jool",
     name: "Jool",
     group: "Jool System",
+    difficulty: "Advanced",
     description:
       "Gas giant — no surface. Thick atmosphere; aerobraking into Jool orbit is possible but risky.",
     legs: [
@@ -198,6 +219,7 @@ export const DESTINATIONS: Destination[] = [
     id: "laythe",
     name: "Laythe",
     group: "Jool System",
+    difficulty: "Advanced",
     description:
       "Ocean moon of Jool with a breathable atmosphere. Jet engines work here.",
     surfaceGravity: 1.96,
@@ -228,6 +250,7 @@ export const DESTINATIONS: Destination[] = [
     id: "tylo",
     name: "Tylo",
     group: "Jool System",
+    difficulty: "Expert",
     description:
       "Largest Jool moon. No atmosphere and strong gravity — hardest landing in Jool system.",
     surfaceGravity: 7.85,
@@ -244,6 +267,7 @@ export const DESTINATIONS: Destination[] = [
     id: "vall",
     name: "Vall",
     group: "Jool System",
+    difficulty: "Advanced",
     description: "Icy moon of Jool. No atmosphere, medium gravity.",
     surfaceGravity: 2.31,
     legs: [
@@ -259,6 +283,7 @@ export const DESTINATIONS: Destination[] = [
     id: "bop",
     name: "Bop",
     group: "Jool System",
+    difficulty: "Advanced",
     description:
       "Captured asteroid moon of Jool in a highly inclined orbit. Very low gravity.",
     surfaceGravity: 0.589,
@@ -275,6 +300,7 @@ export const DESTINATIONS: Destination[] = [
     id: "pol",
     name: "Pol",
     group: "Jool System",
+    difficulty: "Advanced",
     description:
       "Outermost and smallest moon of Jool. Lumpy surface, negligible gravity.",
     surfaceGravity: 0.373,
@@ -293,6 +319,7 @@ export const DESTINATIONS: Destination[] = [
     id: "eeloo",
     name: "Eeloo",
     group: "Outer System",
+    difficulty: "Advanced",
     description:
       "Icy dwarf planet at the edge of the solar system. No atmosphere.",
     surfaceGravity: 1.69,

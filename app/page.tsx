@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DeltaVMap from "@/components/DeltaVMap";
 import BodyList from "@/components/BodyList";
 import MissionPanel from "@/components/MissionPanel";
 import ThemeToggle from "@/components/ThemeToggle";
+import { DESTINATIONS } from "@/lib/deltav-data";
 
 /** Four L-shaped corner brackets in HAL red */
 function CornerBrackets() {
@@ -53,6 +54,52 @@ export default function Home() {
   const [fromLKO, setFromLKO] = useState(false);
   const [orbitOnly, setOrbitOnly] = useState(false);
   const [redundancy, setRedundancy] = useState(0);
+
+  // ── Read URL params on mount ───────────────────────────────────────────────
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const d = params.get("d");
+    if (d && DESTINATIONS.find((dest) => dest.id === d)) setSelected(d);
+    if (params.get("r") === "1") setIsReturn(true);
+    if (params.get("lko") === "1") setFromLKO(true);
+    if (params.get("orb") === "1") setOrbitOnly(true);
+    const margin = params.get("margin");
+    if (margin) setRedundancy(Math.min(50, Math.max(0, Number(margin))));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Sync state → URL ──────────────────────────────────────────────────────
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (selected) params.set("d", selected);
+    if (isReturn) params.set("r", "1");
+    if (fromLKO) params.set("lko", "1");
+    if (orbitOnly) params.set("orb", "1");
+    if (redundancy > 0) params.set("margin", String(redundancy));
+    const qs = params.toString();
+    window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
+  }, [selected, isReturn, fromLKO, orbitOnly, redundancy]);
+
+  // ── Keyboard navigation ───────────────────────────────────────────────────
+  useEffect(() => {
+    const ids = DESTINATIONS.map((d) => d.id);
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelected((prev) => {
+          const idx = prev ? ids.indexOf(prev) : -1;
+          return ids[(idx + 1) % ids.length];
+        });
+      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelected((prev) => {
+          const idx = prev ? ids.indexOf(prev) : 0;
+          return ids[(idx - 1 + ids.length) % ids.length];
+        });
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, []);
 
   return (
     <>
@@ -148,7 +195,7 @@ export default function Home() {
                     }}
                   />
                   <p className="text-xs mt-2 text-center font-mono uppercase tracking-widest" style={{ color: "var(--c-text3)" }}>
-                    [ Δv to reach orbit · click body to select ]
+                    [ Δv to reach orbit · click body to select · ← → to navigate ]
                   </p>
                   <p className="text-xs mt-1 text-center font-mono xl:hidden" style={{ color: "var(--c-text3)" }}>
                     [ Scroll to explore system ]

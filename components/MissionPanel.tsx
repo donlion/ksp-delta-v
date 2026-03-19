@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   DESTINATIONS,
   BODY_COLORS,
+  DIFFICULTY_COLORS,
   buildReturnLegs,
   KERBIN_GRAVITY,
   type Leg,
@@ -126,6 +127,15 @@ export default function MissionPanel({
 }: Props) {
   // ── Field notes toggle ────────────────────────────────────────────────────
   const [showNotes, setShowNotes] = useState(false);
+
+  // ── Copy link ─────────────────────────────────────────────────────────────
+  const [copied, setCopied] = useState(false);
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   // ── Typewriter for destination name ──────────────────────────────────────
   const [displayedName, setDisplayedName] = useState("");
@@ -259,7 +269,7 @@ export default function MissionPanel({
     >
       {/* Colored terminal header strip */}
       <div
-        className="px-4 py-2.5 flex items-baseline justify-between flex-shrink-0"
+        className="px-4 py-2.5 flex items-center justify-between flex-shrink-0"
         style={{
           background: color + "22",
           borderBottom: `1px solid ${color}40`,
@@ -271,11 +281,21 @@ export default function MissionPanel({
         >
           {d.group}
         </span>
-        <span
-          className="text-xs font-mono uppercase tracking-widest"
-          style={{ color: color, opacity: 0.55 }}
-        >
-          Mission Computer
+        <span className="flex items-center gap-3">
+          <button
+            onClick={handleCopyLink}
+            className="text-xs font-mono uppercase tracking-widest cursor-pointer transition-colors"
+            style={{ color: copied ? color : "var(--c-text3)" }}
+            title="Copy shareable link"
+          >
+            {copied ? "✓ Copied" : "Share ↗"}
+          </button>
+          <span
+            className="text-xs font-mono uppercase tracking-widest"
+            style={{ color: color, opacity: 0.55 }}
+          >
+            Mission Computer
+          </span>
         </span>
       </div>
 
@@ -306,6 +326,18 @@ export default function MissionPanel({
               {(d.surfaceGravity / KERBIN_GRAVITY).toFixed(2)} g)
             </p>
           )}
+          <p className="flex items-center gap-1.5 mt-2">
+            <span
+              className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
+              style={{ background: DIFFICULTY_COLORS[d.difficulty] }}
+            />
+            <span
+              className="text-xs font-mono uppercase tracking-widest"
+              style={{ color: DIFFICULTY_COLORS[d.difficulty] }}
+            >
+              {d.difficulty}
+            </span>
+          </p>
         </div>
 
         {/* Toggle switches */}
