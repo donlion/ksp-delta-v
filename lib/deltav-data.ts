@@ -71,6 +71,20 @@ export const KERBIN_GRAVITY = 9.81;
 export const DESTINATIONS: Destination[] = [
   // ── Kerbin System ────────────────────────────────────────────────────────
   {
+    id: "kerbin",
+    name: "Kerbin",
+    group: "Kerbin System",
+    difficulty: "Beginner",
+    description:
+      "Home. The blue-green jewel of the Kerbol system. Its thick atmosphere enables aerobrake capture — deorbit from LKO costs a mere 80 m/s.",
+    surfaceGravity: 9.81,
+    scienceMultiplier: 1,
+    legs: [
+      { from: "Kerbin Surface", to: "Low Kerbin Orbit", deltaV: 3400 },
+      { from: "Low Kerbin Orbit", to: "Kerbin Surface", deltaV: 80, canAerobrake: true },
+    ],
+  },
+  {
     id: "mun",
     name: "Mun",
     group: "Kerbin System",
@@ -711,6 +725,7 @@ export const DESTINATION_GROUPS: DestinationGroup[] = [
 
 /** Per-body accent colors (matches DeltaVMap node strokes) */
 export const BODY_COLORS: Record<string, string> = {
+  kerbin:     "#4070d0",
   mun:        "#909090",
   minmus:     "#50a060",
   moho:       "#c8a050",

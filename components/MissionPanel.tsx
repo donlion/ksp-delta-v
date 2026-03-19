@@ -182,33 +182,74 @@ export default function MissionPanel({
   const hasNoSurface = dest?.surfaceGravity == null && dest != null;
   const originHasNoSurface = originDest?.surfaceGravity == null && originDest != null;
 
+  const isKerbinDest = dest?.id === "kerbin";
+  // When Kerbin is selected but no custom origin is set, there's no route to compute
+  const isKerbinNoOrigin = isKerbinDest && !originDest;
+
   let outboundLegs: Leg[];
   let returnLegs: Leg[];
 
   if (dest && originDest && !isSameAsOrigin) {
-    // Custom origin: origin → LKO → destination
-    const originReturnLegs = buildReturnLegs(originDest.legs);
-    // Departure from origin (surface or orbit) toward LKO
+    // Find how many leading legs origin and destination share (e.g. both Jool moons
+    // share the Kerbin→LKO and LKO→Jool Transfer legs, so we route via Jool SOI
+    // instead of bouncing back to Kerbin).
+    let commonLen = 0;
+    while (
+      commonLen < originDest.legs.length &&
+      commonLen < dest.legs.length &&
+      originDest.legs[commonLen].from === dest.legs[commonLen].from &&
+      originDest.legs[commonLen].to === dest.legs[commonLen].to
+    ) {
+      commonLen++;
+    }
+
+    // Unique legs for each body (everything after the shared prefix)
+    const originUnique = originDest.legs.slice(commonLen);
+    const destUnique = dest.legs.slice(commonLen);
+
+    // Origin departure: reverse the unique origin legs
+    const originDepartureFull: Leg[] = [...originUnique].reverse().map((leg) => ({
+      from: leg.to,
+      to: leg.from,
+      deltaV: leg.deltaV,
+      canAerobrake: leg.canAerobrake,
+    }));
+    // fromLKO = "from origin orbit": skip the first leg (surface → orbit)
     const originDeparture =
       fromLKO && !originHasNoSurface
-        ? originReturnLegs.slice(1, -1) // skip origin surface→orbit and Kerbin landing
-        : originReturnLegs.slice(0, -1); // skip only the Kerbin landing
-    // Arrival at destination from LKO (skip Kerbin Surface → LKO leg)
-    const destArrivalFull = dest.legs.slice(1);
+        ? originDepartureFull.slice(1)
+        : originDepartureFull;
+
+    // Destination arrival: the unique destination legs
     const destArrival =
-      !hasNoSurface && orbitOnly ? destArrivalFull.slice(0, -1) : destArrivalFull;
+      !hasNoSurface && !isKerbinDest && orbitOnly
+        ? destUnique.slice(0, -1)
+        : destUnique;
+
     outboundLegs = [...originDeparture, ...destArrival];
 
-    // Return: destination → LKO → origin
-    const destReturnLegs = buildReturnLegs(dest.legs);
-    const destReturn = destReturnLegs.slice(
-      orbitOnly ? 1 : 0, // skip dest surface→orbit if orbit-only
-      -1,                 // drop final LKO → Kerbin Surface leg
+    // Return: destination → junction → origin
+    const destReturnRaw: Leg[] = [...destUnique].reverse().map((leg) => ({
+      from: leg.to,
+      to: leg.from,
+      deltaV: leg.deltaV,
+      canAerobrake: leg.canAerobrake,
+    }));
+    // If the first return leg departs Kerbin Surface, it was the aerobrake landing
+    // leg reversed — fix the cost back to the actual launch Δv.
+    const destReturnFixed = destReturnRaw.map((leg, i) =>
+      i === 0 && leg.from === "Kerbin Surface" && leg.to === "Low Kerbin Orbit"
+        ? { ...leg, deltaV: 3400, canAerobrake: false }
+        : leg
     );
+    const destReturn = destReturnFixed.slice(orbitOnly && !isKerbinDest ? 1 : 0);
+
+    // toOrigin: the unique origin legs (junction → origin body)
     const toOrigin =
       fromLKO && !originHasNoSurface
-        ? originDest.legs.slice(1, -1) // LKO → origin orbit (no surface)
-        : originDest.legs.slice(1);    // LKO → origin surface
+        ? originUnique.slice(0, -1) // arrive at origin orbit, skip surface landing
+        : originUnique;
+
     returnLegs = [...destReturn, ...toOrigin];
   } else if (dest) {
     // Default Kerbin origin
@@ -225,7 +266,7 @@ export default function MissionPanel({
     returnLegs = [];
   }
 
-  const allLegs: { label: string; legs: Leg[] }[] = dest && !isSameAsOrigin
+  const allLegs: { label: string; legs: Leg[] }[] = dest && !isSameAsOrigin && !isKerbinNoOrigin
     ? isReturn
       ? [
           { label: "Outbound", legs: outboundLegs },
@@ -344,7 +385,7 @@ export default function MissionPanel({
             >
               Origin
             </span>
-          ) : (
+          ) : !isKerbinDest ? (
             <button
               onClick={() => onSetOrigin(destinationId)}
               className="text-xs font-mono uppercase tracking-widest cursor-pointer transition-colors"
@@ -353,7 +394,7 @@ export default function MissionPanel({
             >
               Set as origin
             </button>
-          )}
+          ) : null}
           <span
             className="text-xs font-mono uppercase tracking-widest"
             style={{ color: color, opacity: 0.7 }}
@@ -510,7 +551,7 @@ export default function MissionPanel({
               }
             />
           )}
-          {!hasNoSurface && (
+          {!hasNoSurface && !isKerbinDest && (
             <ToggleSwitch
               active={orbitOnly}
               onClick={onToggleOrbitOnly}
@@ -549,6 +590,21 @@ export default function MissionPanel({
             {redundancy}%
           </span>
         </div>
+
+        {/* Kerbin-as-destination hint when no custom origin is set */}
+        {isKerbinNoOrigin && (
+          <div
+            className="p-3 text-center"
+            style={{ background: color + "12", border: `1px solid ${color}30` }}
+          >
+            <p className="text-xs font-mono" style={{ color: "var(--c-text3)" }}>
+              Kerbin is the default origin.
+            </p>
+            <p className="text-xs font-mono mt-1" style={{ color: "var(--c-text3)" }}>
+              Set a different body as origin to plan travel to Kerbin.
+            </p>
+          </div>
+        )}
 
         {/* Same-as-origin warning */}
         {isSameAsOrigin && (

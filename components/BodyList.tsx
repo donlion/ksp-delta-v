@@ -49,7 +49,7 @@ const OPM_SOLAR_SYSTEM: BodyEntry[] = [
 ];
 
 // Non-selectable bodies (no mission data)
-const NON_DEST = new Set(["kerbol", "kerbin"]);
+const NON_DEST = new Set(["kerbol"]);
 
 interface Props {
   selected: string | null;

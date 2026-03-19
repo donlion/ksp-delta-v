@@ -144,12 +144,14 @@ const OPM_EDGES: EdgeDef[] = [
 
 // Selectable destinations (stock)
 const STOCK_DESTINATIONS = new Set([
+  "kerbin",
   "mun", "minmus", "moho", "eve", "gilly", "duna", "ike",
   "dres", "jool", "laythe", "tylo", "vall", "bop", "pol", "eeloo",
 ]);
 
 // Selectable destinations (OPM — replaces eeloo with eeloo-opm, adds rest)
 const OPM_DESTINATIONS = new Set([
+  "kerbin",
   "mun", "minmus", "moho", "eve", "gilly", "duna", "ike",
   "dres", "jool", "laythe", "tylo", "vall", "bop", "pol",
   "sarnus", "slate", "tekto", "ovok", "hale", "eeloo-opm",

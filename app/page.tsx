@@ -91,7 +91,7 @@ export default function Home() {
       setSelected(d);
     }
     const o = params.get("o");
-    if (o && DESTINATIONS.find((dest) => dest.id === o && (opm ? !dest.stockOnly : !dest.opmOnly))) {
+    if (o && o !== "kerbin" && DESTINATIONS.find((dest) => dest.id === o && (opm ? !dest.stockOnly : !dest.opmOnly))) {
       setOriginId(o);
     }
     if (params.get("r") === "1") setIsReturn(true);
