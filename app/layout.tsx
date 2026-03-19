@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Anti-flash: apply stored theme before first paint */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('ksp-theme');if(t==='light')document.documentElement.classList.add('light');}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('ksp-theme');var isLight=t==='light'||(t!=='dark'&&window.matchMedia('(prefers-color-scheme: light)').matches);if(isLight)document.documentElement.classList.add('light');}catch(e){}})();`,
           }}
         />
       </head>

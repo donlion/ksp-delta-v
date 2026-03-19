@@ -7,7 +7,8 @@ export default function ThemeToggle() {
 
   useEffect(() => {
     const stored = localStorage.getItem("ksp-theme");
-    const dark = stored !== "light";
+    const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const dark = stored === "dark" || (stored !== "light" && systemDark);
     setIsDark(dark);
   }, []);
 
