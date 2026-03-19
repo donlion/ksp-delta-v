@@ -222,21 +222,21 @@ export default function MissionPanel({
           border: "1px solid var(--c-border)",
         }}
       >
-        {/* HAL-style eye placeholder */}
+        {/* HAL-style eye placeholder — color adapts to active theme */}
         <div
           className="hal-glow w-14 h-14 rounded-full flex items-center justify-center"
           style={{
             background:
-              "radial-gradient(circle at 40% 38%, #3a0a08 0%, #0a0204 70%)",
-            border: "1.5px solid rgba(191,45,28,0.35)",
+              "radial-gradient(circle at 40% 38%, var(--c-surface) 0%, var(--c-bg) 70%)",
+            border: "1.5px solid var(--c-hal-dim)",
           }}
         >
           <div
             className="w-6 h-6 rounded-full"
             style={{
               background:
-                "radial-gradient(circle at 38% 35%, #e84030 0%, #8a1a10 55%, #3a0a06 100%)",
-              boxShadow: "0 0 8px 3px rgba(191,45,28,0.4)",
+                "radial-gradient(circle at 38% 35%, var(--c-hal) 0%, var(--c-hal-dim) 55%, transparent 100%)",
+              boxShadow: "0 0 8px 3px var(--c-hal-dim)",
             }}
           />
         </div>

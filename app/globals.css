@@ -132,9 +132,14 @@ body {
   color: var(--c-text);
 }
 
+/* [data-panel] needs position:relative for ::before/::after decorations */
+[data-panel] {
+  position: relative;
+}
+
 /* ── Per-theme body backgrounds ───────────────────────────────────────────── */
 
-/* SpaceX: deep navy gradient — like the Dragon capsule display backdrop */
+/* SpaceX: deep navy gradient — Dragon capsule display backdrop */
 :root.theme-spacex body {
   background:
     linear-gradient(160deg, #0d1829 0%, #101e35 55%, #0c1a2e 100%);
@@ -149,15 +154,15 @@ body {
 /* Blade Runner: dark brown with Victorian graph-paper grid */
 :root.theme-bladerunner body {
   background:
-    repeating-linear-gradient(0deg,  transparent, transparent 39px, rgba(180,100,30,0.07) 39px, rgba(180,100,30,0.07) 40px),
-    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(180,100,30,0.05) 39px, rgba(180,100,30,0.05) 40px),
+    repeating-linear-gradient(0deg,  transparent, transparent 39px, rgba(180,100,30,0.09) 39px, rgba(180,100,30,0.09) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(180,100,30,0.06) 39px, rgba(180,100,30,0.06) 40px),
     var(--c-bg);
   background-attachment: fixed;
 }
 :root.theme-bladerunner.light body {
   background:
-    repeating-linear-gradient(0deg,  transparent, transparent 39px, rgba(160,90,20,0.09) 39px, rgba(160,90,20,0.09) 40px),
-    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(160,90,20,0.06) 39px, rgba(160,90,20,0.06) 40px),
+    repeating-linear-gradient(0deg,  transparent, transparent 39px, rgba(160,90,20,0.11) 39px, rgba(160,90,20,0.11) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(160,90,20,0.08) 39px, rgba(160,90,20,0.08) 40px),
     var(--c-bg);
   background-attachment: fixed;
 }
@@ -187,7 +192,7 @@ body::before {
   transition: opacity 0.4s ease;
 }
 
-/* Light modes, SpaceX (clean), Blade Runner (texured bg takes over) */
+/* Light modes, SpaceX (clean), Blade Runner (textured bg takes over) */
 :root.light body::before             { opacity: 0; }
 :root.theme-spacex body::before      { opacity: 0; }
 :root.theme-bladerunner body::before { opacity: 0; }
@@ -204,37 +209,45 @@ body::after {
   inset: 0;
   pointer-events: none;
   z-index: 0;
+  /* Void dark: subtle CRT scanlines — each theme rule below overrides this */
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.042) 3px,
+    rgba(0, 0, 0, 0.042) 4px
+  );
 }
 
 /* Interstellar: ghost of the tesseract — faint gold warmth below */
 :root.theme-interstellar body::after {
-  background: radial-gradient(ellipse at 50% 90%, rgba(200,160,48,0.06) 0%, transparent 55%);
+  background: radial-gradient(ellipse at 50% 90%, rgba(200,160,48,0.08) 0%, transparent 55%);
 }
 
 /* SpaceX: blue engine glow at the bottom */
 :root.theme-spacex body::after {
-  background: radial-gradient(ellipse at 50% 100%, rgba(61,142,240,0.08) 0%, transparent 45%);
+  background: radial-gradient(ellipse at 50% 100%, rgba(61,142,240,0.10) 0%, transparent 50%);
 }
 
 /* Blade Runner: amber forge glow — lower left, like a furnace */
 :root.theme-bladerunner body::after {
   background:
-    radial-gradient(ellipse at 10% 85%, rgba(212,135,42,0.07) 0%, transparent 45%),
-    radial-gradient(ellipse at 60% 95%, rgba(180,80,20,0.05) 0%, transparent 40%);
+    radial-gradient(ellipse at 8% 88%, rgba(212,135,42,0.11) 0%, transparent 45%),
+    radial-gradient(ellipse at 65% 95%, rgba(180,80,20,0.07) 0%, transparent 40%);
 }
 
 /* Hitchhiker: friendly green nebula wash */
 :root.theme-hitchhiker body::after {
   background:
-    radial-gradient(ellipse at 25% 65%, rgba(48,216,120,0.04) 0%, transparent 45%),
-    radial-gradient(ellipse at 75% 25%, rgba(48,216,120,0.03) 0%, transparent 40%);
+    radial-gradient(ellipse at 25% 65%, rgba(48,216,120,0.05) 0%, transparent 45%),
+    radial-gradient(ellipse at 75% 25%, rgba(48,216,120,0.04) 0%, transparent 40%);
 }
 
 :root.light body::after { display: none; }
 
 /* ── Panel-level treatments via [data-panel] ──────────────────────────────── */
 
-/* SpaceX: rounded cards with a subtle top-lit gradient — Dragon display style */
+/* SpaceX: rounded cards — Dragon display style */
 :root.theme-spacex [data-panel] {
   border-radius: 14px !important;
   overflow: hidden !important;
@@ -244,12 +257,26 @@ body::after {
     rgba(255,255,255,0.058) 0%,
     rgba(255,255,255,0.016) 100%
   ), #131f38 !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(61,142,240,0.07) !important;
 }
 :root.theme-spacex.light [data-panel] {
   border-radius: 14px !important;
   overflow: hidden !important;
   border-color: rgba(61,142,240,0.18) !important;
-  box-shadow: 0 2px 16px rgba(61,142,240,0.07) !important;
+  box-shadow: 0 4px 24px rgba(61,142,240,0.08), 0 1px 3px rgba(0,0,0,0.06) !important;
+}
+
+/* SpaceX: glass-panel top highlight — light catching the top edge */
+:root.theme-spacex [data-panel]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 14%;
+  right: 14%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(61,142,240,0.40), transparent);
+  z-index: 2;
+  pointer-events: none;
 }
 
 /* Blade Runner: Victorian double-frame — outer border + inner brass inset */
@@ -259,8 +286,8 @@ body::after {
   border-radius: 0 !important;
   box-shadow:
     inset 0 0 0 3px var(--c-bg),
-    inset 0 0 0 5px rgba(212,135,42,0.18),
-    0 6px 20px rgba(0,0,0,0.55) !important;
+    inset 0 0 0 5px rgba(212,135,42,0.30),
+    0 8px 28px rgba(0,0,0,0.65) !important;
 }
 :root.theme-bladerunner.light [data-panel] {
   border-width: 2px !important;
@@ -268,31 +295,67 @@ body::after {
   border-radius: 0 !important;
   box-shadow:
     inset 0 0 0 3px var(--c-bg),
-    inset 0 0 0 5px rgba(200,144,28,0.22),
+    inset 0 0 0 5px rgba(200,144,28,0.32),
     0 4px 14px rgba(0,0,0,0.15) !important;
 }
 
-/* Hitchhiker: friendly rounded panels */
+/* Blade Runner: brass light bar — catching light on the top of the frame */
+:root.theme-bladerunner [data-panel]::before {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 8px;
+  right: 8px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,135,42,0.50), transparent);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Interstellar: ultra-minimal — gold top accent, near-invisible sides */
+:root.theme-interstellar [data-panel] {
+  border-top: 2px solid var(--c-hal) !important;
+  border-left: 1px solid rgba(14, 28, 44, 0.8) !important;
+  border-right: 1px solid rgba(14, 28, 44, 0.8) !important;
+  border-bottom: 1px solid rgba(14, 28, 44, 0.8) !important;
+  border-radius: 0 !important;
+}
+:root.theme-interstellar.light [data-panel] {
+  border-top: 2px solid var(--c-hal) !important;
+  border-left: 1px solid rgba(192, 202, 212, 0.5) !important;
+  border-right: 1px solid rgba(192, 202, 212, 0.5) !important;
+  border-bottom: 1px solid rgba(192, 202, 212, 0.5) !important;
+  border-radius: 0 !important;
+}
+
+/* Hitchhiker: friendly rounded panels with green glow */
 :root.theme-hitchhiker [data-panel] {
-  border-radius: 10px !important;
+  border-radius: 12px !important;
   overflow: hidden !important;
+  box-shadow: 0 4px 24px rgba(48,216,120,0.08), 0 0 0 1px rgba(48,216,120,0.07) !important;
+}
+/* Mission panel gets a left accent bar — like a "Guide entry" */
+:root.theme-hitchhiker [data-panel="mission"] {
+  border-left: 3px solid var(--c-hal) !important;
+  border-radius: 0 12px 12px 0 !important;
 }
 
 /* ── Per-theme typography ─────────────────────────────────────────────────── */
 
-/* SpaceX: Barlow Condensed throughout — technical, slightly condensed */
+/* SpaceX: Barlow Condensed — technical, slightly condensed, tabular numbers */
 :root.theme-spacex body,
 :root.theme-spacex .font-mono {
   font-family: var(--font-barlow), 'Barlow Condensed', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
 }
 :root.theme-spacex h1,
 :root.theme-spacex h2 {
   font-family: var(--font-barlow), 'Barlow Condensed', system-ui, sans-serif;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   font-weight: 700;
 }
 
-/* Blade Runner: Cinzel for display text, Playfair Display for body — Victorian feel */
+/* Blade Runner: Cinzel for display, Playfair Display for body — Victorian */
 :root.theme-bladerunner body {
   font-family: var(--font-playfair), 'Playfair Display', Georgia, serif;
 }
@@ -301,10 +364,30 @@ body::after {
   font-family: var(--font-cinzel), 'Cinzel', Georgia, serif;
   letter-spacing: 0.1em;
   font-weight: 600;
+  text-shadow: 0 0 20px rgba(212,135,42,0.28), 0 0 45px rgba(212,135,42,0.10);
 }
 :root.theme-bladerunner .font-mono {
   font-family: var(--font-cinzel), 'Cinzel', Georgia, serif;
   letter-spacing: 0.06em;
+}
+
+/* Blade Runner: stronger amber glow on the destination name specifically */
+:root.theme-bladerunner [data-panel="mission"] h2 {
+  text-shadow: 0 0 16px rgba(212,135,42,0.38), 0 0 36px rgba(212,135,42,0.14);
+}
+
+/* Interstellar: Exo 2 — cold, clinical, precisely geometric */
+:root.theme-interstellar body,
+:root.theme-interstellar .font-mono {
+  font-family: var(--font-exo2), 'Exo 2', system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+:root.theme-interstellar h1,
+:root.theme-interstellar h2 {
+  font-family: var(--font-exo2), 'Exo 2', system-ui, sans-serif;
+  letter-spacing: 0.12em;
+  font-weight: 300;
+  text-transform: uppercase;
 }
 
 /* Hitchhiker: Nunito — warm, rounded letterforms */

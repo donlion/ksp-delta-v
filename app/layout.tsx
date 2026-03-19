@@ -4,6 +4,7 @@ import {
   Space_Mono,
   Barlow_Condensed,
   Cinzel,
+  Exo_2,
   Playfair_Display,
   Nunito,
 } from "next/font/google";
@@ -41,6 +42,13 @@ const playfairDisplay = Playfair_Display({
   variable: "--font-playfair",
 });
 
+/** Interstellar — cold clinical geometric sans */
+const exo2 = Exo_2({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-exo2",
+});
+
 /** Hitchhiker's Guide — friendly rounded */
 const nunito = Nunito({
   subsets: ["latin"],
@@ -64,7 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className={`${spaceGrotesk.variable} ${spaceMono.variable} ${barlowCondensed.variable} ${cinzel.variable} ${playfairDisplay.variable} ${nunito.variable} font-sans`}>
+      <body className={`${spaceGrotesk.variable} ${spaceMono.variable} ${barlowCondensed.variable} ${cinzel.variable} ${exo2.variable} ${playfairDisplay.variable} ${nunito.variable} font-sans`}>
         {children}
       </body>
     </html>
