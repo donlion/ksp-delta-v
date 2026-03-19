@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import DeltaVMap from "@/components/DeltaVMap";
+import BodyList from "@/components/BodyList";
 import MissionPanel from "@/components/MissionPanel";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -47,6 +48,7 @@ function CornerBrackets() {
 
 export default function Home() {
   const [selected, setSelected] = useState<string | null>(null);
+  const [mapView, setMapView] = useState<"map" | "list">("map");
   const [isReturn, setIsReturn] = useState(false);
   const [fromLKO, setFromLKO] = useState(false);
   const [orbitOnly, setOrbitOnly] = useState(false);
@@ -90,18 +92,37 @@ export default function Home() {
               <span className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--c-text3)" }}>
                 Navigation Computer · Kerbol System
               </span>
-              <span className="flex items-center gap-1.5">
-                <span
-                  className="inline-block w-1.5 h-1.5 rounded-full"
-                  style={{ background: "#3a9a50", boxShadow: "0 0 4px 1px rgba(58,154,80,0.5)" }}
-                />
-                <span className="text-xs font-mono uppercase tracking-widest" style={{ color: "#3a9a50" }}>
-                  Online
+              <span className="flex items-center gap-3">
+                {/* View toggle */}
+                <span className="flex items-center gap-0" style={{ border: "1px solid var(--c-border)", borderRadius: 3, overflow: "hidden" }}>
+                  {(["map", "list"] as const).map((v) => (
+                    <button
+                      key={v}
+                      onClick={() => setMapView(v)}
+                      className="text-xs font-mono uppercase tracking-widest px-2 py-0.5 transition-colors cursor-pointer"
+                      style={{
+                        background: mapView === v ? "var(--c-border)" : "transparent",
+                        color: mapView === v ? "var(--c-text)" : "var(--c-text3)",
+                        border: "none",
+                      }}
+                    >
+                      {v}
+                    </button>
+                  ))}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span
+                    className="inline-block w-1.5 h-1.5 rounded-full"
+                    style={{ background: "#3a9a50", boxShadow: "0 0 4px 1px rgba(58,154,80,0.5)" }}
+                  />
+                  <span className="text-xs font-mono uppercase tracking-widest" style={{ color: "#3a9a50" }}>
+                    Online
+                  </span>
                 </span>
               </span>
             </div>
 
-            {/* Map area */}
+            {/* Map / List area */}
             <div
               className="p-4 overflow-x-auto"
               style={{
@@ -112,24 +133,30 @@ export default function Home() {
                 borderBottom: "1px solid var(--c-border)",
               }}
             >
-              <DeltaVMap selected={selected} onSelect={setSelected} />
-              {/* CRT vignette */}
-              <div
-                className="map-vignette"
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  pointerEvents: "none",
-                  background: "radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(0,0,0,0.72) 100%)",
-                  zIndex: 5,
-                }}
-              />
-              <p className="text-xs mt-2 text-center font-mono uppercase tracking-widest" style={{ color: "var(--c-text3)" }}>
-                [ Δv to reach orbit · click body to select ]
-              </p>
-              <p className="text-xs mt-1 text-center font-mono xl:hidden" style={{ color: "var(--c-text3)" }}>
-                [ Scroll to explore system ]
-              </p>
+              {mapView === "map" ? (
+                <>
+                  <DeltaVMap selected={selected} onSelect={setSelected} />
+                  {/* CRT vignette */}
+                  <div
+                    className="map-vignette"
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      pointerEvents: "none",
+                      background: "radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(0,0,0,0.72) 100%)",
+                      zIndex: 5,
+                    }}
+                  />
+                  <p className="text-xs mt-2 text-center font-mono uppercase tracking-widest" style={{ color: "var(--c-text3)" }}>
+                    [ Δv to reach orbit · click body to select ]
+                  </p>
+                  <p className="text-xs mt-1 text-center font-mono xl:hidden" style={{ color: "var(--c-text3)" }}>
+                    [ Scroll to explore system ]
+                  </p>
+                </>
+              ) : (
+                <BodyList selected={selected} onSelect={setSelected} />
+              )}
             </div>
           </div>
 
