@@ -139,6 +139,140 @@ export const DESTINATION_TIPS: Record<string, Tip[]> = {
     { category: "lore",    text: "Originally planned as a moon of an unimplemented second gas giant with active cryovolcanism. That planet was never added to KSP 1." },
     { category: "egg",     text: "A 'Snowman made of rusty rocket parts' is located at 25.9968°N, 110.5918°E — a fitting memorial on the distant icy world." },
   ],
+
+  // ── Outer Planets Mod ─────────────────────────────────────────────────────
+
+  sarnus: [
+    { category: "vessel",  text: "Sarnus is a gas giant with no solid surface — any craft descending too deep into the atmosphere will be destroyed. Treat it like Jool." },
+    { category: "vessel",  text: "Aerobraking into low Sarnus orbit is possible but demands a robust heat shield. The upper atmosphere is thinner than Jool's — set your periapsis slightly lower than you would at Jool." },
+    { category: "vessel",  text: "RTGs are mandatory. Solar panels produce less than 1% of Kerbin output at Sarnus' distance from Kerbol." },
+    { category: "lore",    text: "KSP's Saturn analog, complete with a ring system visible from the surfaces of its moons. The rings are particle-based and will not destroy craft passing through them." },
+    { category: "lore",    text: "Sarnus has five moons: Hale, Ovok, Eeloo, Slate, and Tekto — a diverse mix of rocky, icy, and atmospheric worlds." },
+  ],
+
+  slate: [
+    { category: "vessel",  text: "Slate has no atmosphere and ~0.56g surface gravity — comparable to Tylo but slightly easier. All landing and ascent burns are propulsive." },
+    { category: "vessel",  text: "Budget at least 1,800 m/s for landing and 1,800 m/s for ascent from low Slate orbit. Leave your return fuel in orbit, Apollo-style." },
+    { category: "vessel",  text: "A surface TWR of 1.3+ is recommended. Orbital velocity at 30 km is around 1,800 m/s — similar in scale to the Mun." },
+    { category: "terrain", text: "Slate's terrain is heavily cratered with wide flat floors — these are your best landing zones. Avoid crater rims and highlands." },
+    { category: "lore",    text: "The largest moon of Sarnus and one of the most scientifically interesting in the outer system. Its slate-grey surface suggests a silicate-rich composition." },
+  ],
+
+  tekto: [
+    { category: "vessel",  text: "Tekto has a thick nitrogen atmosphere — parachutes work, but jet engines do not (no oxygen). Plan your ascent vehicle around rockets only." },
+    { category: "vessel",  text: "The atmosphere is dense enough that a heatshield-equipped probe can aerobrake directly from a Sarnus transfer. Useful for robotic precursor missions." },
+    { category: "vessel",  text: "Ascent through Tekto's thick atmosphere creates significant drag. Keep your ascent profile steep and your rocket aerodynamically clean." },
+    { category: "terrain", text: "The surface is dotted with liquid hydrocarbon lakes, similar to Titan in the real solar system. Land on solid ground — liquid 'biomes' exist but splashdowns may be unrecoverable." },
+    { category: "lore",    text: "KSP's Titan analog. Orange atmospheric haze dominates the sky. Kerbals must keep helmets on — the atmosphere is chemically hostile." },
+    { category: "lore",    text: "Tekto is the outermost moon of Sarnus and the only one with a significant atmosphere. Its orange-tinted sky and hydrocarbon seas make it visually one of the most striking worlds in the mod." },
+  ],
+
+  ovok: [
+    { category: "vessel",  text: "Ovok's gravity is extremely low — small RCS thrusters or a tiny engine is enough to land and return. Avoid overshooting your deorbit burn." },
+    { category: "vessel",  text: "Surface gravity of ~0.05g means any unanchored craft will slowly bounce and drift. Thrust downward with RCS to stay planted after touchdown." },
+    { category: "terrain", text: "Ovok is distinctly egg-shaped (oblate spheroid) — terrain elevation varies substantially depending on which 'pole' you approach. The flatter equatorial band offers the easiest landings." },
+    { category: "lore",    text: "Its unusual shape is caused by the same tidal and accretion forces that govern small irregular bodies. Ovok spins slowly, giving it a noticeable equatorial bulge." },
+    { category: "lore",    text: "One of two very small inner moons of Sarnus alongside Hale. Both are likely captured Kuiper Belt-analog objects." },
+  ],
+
+  hale: [
+    { category: "vessel",  text: "Gravity is essentially zero — you can land with a single RCS thruster burst. The 'landing' is more of a controlled dock with a body." },
+    { category: "vessel",  text: "A Kerbal on EVA can easily exceed escape velocity with a single jetpack burst. Do not let crew step outside without anchoring the vessel first." },
+    { category: "vessel",  text: "Delta-v from Sarnus orbit to Hale surface and back is under 100 m/s total. This is arguably the cheapest surface in the Kerbol system to access." },
+    { category: "terrain", text: "Hale is tiny — so small that line-of-sight to Kerbin is nearly always maintained regardless of landing position. No relay network needed." },
+    { category: "lore",    text: "Innermost moon of Sarnus. At such close proximity to the gas giant, Hale skims the outer edge of Sarnus' ring system — spectacular views guaranteed." },
+  ],
+
+  "eeloo-opm": [
+    { category: "vessel",  text: "Eeloo's surface gravity and ΔV requirements are unchanged from its stock incarnation — a Mun-capable lander with extra range is sufficient." },
+    { category: "vessel",  text: "RTGs remain essential. Sarnus is so far from Kerbol that solar output is negligible." },
+    { category: "vessel",  text: "Access via Sarnus orbit first — aerobrake at Sarnus, then transfer to Eeloo. This is more efficient than a direct transfer from LKO." },
+    { category: "terrain", text: "Flat icy plains dominate the equatorial regions. Avoid canyon rims and the cratered highlands near the poles." },
+    { category: "lore",    text: "In OPM lore, Eeloo is a captured icy body — swept inward from the outer reaches and locked into a Sarnus orbit. The same world, a very different journey." },
+    { category: "lore",    text: "The 'Snowman' easter egg from stock Eeloo has followed it into the mod, still sitting at 25.9968°N, 110.5918°E." },
+  ],
+
+  plock: [
+    { category: "vessel",  text: "RTGs are mandatory at Plock's distance. Solar panels are almost completely useless this far from Kerbol." },
+    { category: "vessel",  text: "The transfer window is rare and the transit time is extremely long — budget for the communication delay if playing with CommNet. A relay satellite left in Plock orbit helps significantly." },
+    { category: "vessel",  text: "Plock-Karen is a binary system — tidal forces mean the two bodies are always face-to-face. Factor in which one you're targeting when planning a capture burn." },
+    { category: "terrain", text: "Plock's surface is icy and moderately cratered. Gravity is low enough that a precision landing near a biome boundary is very achievable." },
+    { category: "lore",    text: "KSP's Pluto-Charon analog. Plock and Karen orbit a shared barycentre that lies between them — technically, neither body 'orbits' the other." },
+    { category: "lore",    text: "Plock occupies an eccentric, highly inclined orbit. At some points in its 'year', it actually comes inside Neidon's orbit — though the inclination difference prevents a collision." },
+  ],
+
+  karen: [
+    { category: "vessel",  text: "Karen's gravity is very low — the same considerations as Hale or Gilly apply. Gentle approach burns only." },
+    { category: "vessel",  text: "Transferring from Plock to Karen costs very little ΔV (~130 m/s total). A single small engine can manage the entire surface mission." },
+    { category: "vessel",  text: "Karen and Plock are tidally locked to each other — from Karen's surface, Plock hangs motionless in the sky, filling a large portion of the view." },
+    { category: "terrain", text: "The surface is icy and relatively smooth. Gravity is low enough that gentle slope angles are manageable without tipping." },
+    { category: "lore",    text: "Named after Charon, Pluto's binary companion — itself named after the mythological ferryman of the dead. Karen is roughly half the size of Plock by diameter." },
+    { category: "lore",    text: "The Plock-Karen system is so tidally evolved that both bodies show the same face to each other at all times — a double tidal lock unique in the Kerbol system." },
+  ],
+
+  urlum: [
+    { category: "vessel",  text: "Urlum is a gas giant with no surface. Its extreme axial tilt (~97°) means its moons have unusual polar orbits relative to the ecliptic." },
+    { category: "vessel",  text: "Aerobraking is possible but the upper atmosphere is thin — be more conservative than at Jool. A periapsis of 85–100 km above the 0 km datum is typically safe." },
+    { category: "vessel",  text: "RTGs are critical. At Urlum's distance, solar power output is less than 0.5% of Kerbin values." },
+    { category: "lore",    text: "KSP's Uranus analog. The extreme axial tilt (98°) means its rings are nearly vertical — a stunning sight when orbiting the equatorial moons." },
+    { category: "lore",    text: "Urlum has four moons: Polta, Priax, Wal, and Wal's subsatellite Tal. The system is compact compared to Jool's." },
+  ],
+
+  polta: [
+    { category: "vessel",  text: "No atmosphere — all landing and ascent is propulsive. Gravity is modest at ~0.2g. A lander similar in scale to a Mun mission works well." },
+    { category: "vessel",  text: "Polta and Priax share similar orbits and are often called the 'Urlum twins'. Visiting both in one mission with minimal extra ΔV is very achievable." },
+    { category: "terrain", text: "The surface is rocky and cratered but has identifiable flat areas. Normal landing procedures apply." },
+    { category: "lore",    text: "Innermost major moon of Urlum. Co-orbital resonance with Priax keeps them in a stable configuration despite their proximity." },
+  ],
+
+  priax: [
+    { category: "vessel",  text: "No atmosphere, low gravity (~0.15g). Similar in difficulty to Polta — a mid-range lander handles both without redesign." },
+    { category: "vessel",  text: "The transfer burn from Polta to Priax is minimal — if visiting Urlum's moons, doing Polta and Priax in sequence barely costs extra ΔV." },
+    { category: "terrain", text: "Slightly smaller and less spherical than Polta. Rocky terrain with scattered craters — look for crater floors as landing zones." },
+    { category: "lore",    text: "Shares an orbital resonance with Polta, keeping them from ever colliding despite orbiting at similar altitudes. An elegant gravitational arrangement." },
+  ],
+
+  wal: [
+    { category: "vessel",  text: "Wal has ~0.5g surface gravity and no atmosphere — a significant landing challenge at Urlum's distance. Budget at least 2,500 m/s for landing and ascent." },
+    { category: "vessel",  text: "Leave your interplanetary stage and return fuel in Urlum orbit, not Wal orbit — saves carrying extra mass all the way to the surface." },
+    { category: "vessel",  text: "Wal is large enough that orbital velocity matters. A circular 30 km orbit is around 1,050 m/s — don't let the Urlum transit lull you into underestimating it." },
+    { category: "terrain", text: "Wal has a varied terrain with highlands and crater basins. Target the low-lying plains for the flattest landing zones." },
+    { category: "lore",    text: "The largest moon of Urlum and one of the most scientifically significant in the outer system. Notable for hosting its own subsatellite, Tal — a moon of a moon." },
+  ],
+
+  tal: [
+    { category: "vessel",  text: "Tal is a subsatellite — it orbits Wal, which orbits Urlum. You must capture into Urlum orbit, then Wal orbit, before transferring to Tal." },
+    { category: "vessel",  text: "Tal's gravity is negligible (~0.02g). Treat it like Gilly: approach very slowly, use RCS for touchdown, and don't let your Kerbals EVA unsecured." },
+    { category: "vessel",  text: "The full mission chain — Kerbin → Urlum → Wal → Tal — is one of the most complex in KSP. Plan your staging carefully; each body needs its own capture and departure budget." },
+    { category: "lore",    text: "One of the only natural subsatellites (moon of a moon) in the Kerbol system. In the real universe, such objects are rare due to gravitational instability — their Hill spheres are usually too small." },
+    { category: "lore",    text: "Tal's existence is a nod to theoretical real-world subsatellites. Wal's Hill sphere is unusually large due to Urlum's weak tidal forces at that distance, allowing Tal to persist." },
+  ],
+
+  neidon: [
+    { category: "vessel",  text: "Neidon is the furthest planet from Kerbol. The capture burn is the largest in the Kerbol system at ~2,860 m/s — plan accordingly and consider a gravity assist." },
+    { category: "vessel",  text: "RTGs are not just recommended but critical. Solar panels produce virtually nothing at Neidon's orbital distance." },
+    { category: "vessel",  text: "Neidon has no solid surface. It is a gas giant — any craft descending below the safe atmospheric threshold will be destroyed." },
+    { category: "vessel",  text: "Gravity assists from Thatmo can help reduce the capture burn if timed correctly. Thatmo's retrograde orbit makes this tricky to set up but possible." },
+    { category: "lore",    text: "KSP's Neptune analog. Its deep blue color comes from methane absorption in the upper atmosphere — similar to the real Uranus and Neptune." },
+    { category: "lore",    text: "Neidon's two moons — Thatmo and Nissee — are strikingly different from each other, suggesting they were captured independently rather than forming in-situ." },
+  ],
+
+  thatmo: [
+    { category: "vessel",  text: "Thatmo has a thick atmosphere and orbits Neidon in a retrograde direction — it almost certainly formed elsewhere and was captured." },
+    { category: "vessel",  text: "Parachutes work on Thatmo due to its thick nitrogen atmosphere. However, ascent requires a full rocket — no jet engines." },
+    { category: "vessel",  text: "The retrograde orbit means launch timing matters more than usual. Launching into the correct orbital direction from the surface avoids wasting hundreds of m/s." },
+    { category: "terrain", text: "The atmosphere is thick enough for significant aerodynamic drag during ascent. Keep your rocket aerodynamically streamlined and ascend steeply early on." },
+    { category: "lore",    text: "KSP's Triton analog — a large captured moon with a retrograde orbit and thick atmosphere. The real Triton is thought to be a captured Kuiper Belt object, and Thatmo follows the same logic." },
+    { category: "lore",    text: "Thatmo's retrograde orbit means it is slowly spiralling inward — in the far future it will cross the Roche limit and break up into rings around Neidon. Thankfully, not for billions of years." },
+  ],
+
+  nissee: [
+    { category: "vessel",  text: "Nissee's gravity is negligible. A single RCS burst can exceed escape velocity — approach at the minimum speed your guidance system allows." },
+    { category: "vessel",  text: "There is virtually no distinction between 'orbit' and 'surface' operations at Nissee. Even a full-speed EVA jump from the surface can escape." },
+    { category: "terrain", text: "The surface is irregular and rocky. Without meaningful gravity to pull the craft down, any non-flat terrain is a tipping hazard — land on the flattest spot you can find." },
+    { category: "lore",    text: "Nissee is a tiny captured irregular moon in a highly inclined orbit around Neidon. Like Gilly around Eve, its presence is a geological curiosity rather than a natural formation." },
+    { category: "lore",    text: "At this distance from Kerbol, Nissee is one of the coldest and most remote surfaces in the game. The sky is completely black — no atmospheric scattering, no nearby sun." },
+  ],
 };
 
 export const TIP_CATEGORY_LABELS: Record<TipCategory, string> = {
