@@ -761,6 +761,105 @@ export const BODY_COLORS: Record<string, string> = {
 };
 
 /**
+ * Hardcoded orbit-to-orbit delta-v for same-system transfers.
+ * Key: sorted body IDs joined by "|". Value: Δv in m/s.
+ *
+ * Kerbin system: via LKO as hub.
+ * Jool system: via Low Jool Orbit (LJO) as hub; map edge labels used for LJO↔moon.
+ *   Laythe values MUST be hardcoded — Laythe's legs data bypasses LJO (direct Jool
+ *   SOI Entry aero-capture), which breaks the common-prefix routing algorithm for
+ *   any Laythe↔other-Jool-moon pair.
+ * OPM systems: via the parent planet's low orbit as hub; values derived from leg data.
+ */
+export const INTRA_SYSTEM_DV: Record<string, number> = {
+  // ── Kerbin system ─────────────────────────────────────────────────────────
+  // Via LKO: LMO→LKO = 310+860 = 1170, LKO→LMinO = 930+160 = 1090
+  "minmus|mun":          1170 + 1090, // 2260
+
+  // ── Eve system ────────────────────────────────────────────────────────────
+  // From leg data: LEvO→Gilly Transfer: 60, GT→LGO: 30
+  "eve|gilly":           60 + 30,     // 90
+
+  // ── Duna system ───────────────────────────────────────────────────────────
+  // From leg data: LDO→Ike Transfer: 30, IT→LIO: 180
+  "duna|ike":            30 + 180,    // 210
+
+  // ── Jool system ───────────────────────────────────────────────────────────
+  // LJO↔moon costs (community delta-v map):
+  //   Laythe: 1510  Tylo: 1500  Vall: 1380  Bop: 3100  Pol: 3640
+  "bop|jool":            3100,
+  "jool|laythe":         1510,
+  "jool|pol":            3640,
+  "jool|tylo":           1500,
+  "jool|vall":           1380,
+  "bop|laythe":          3100 + 1510, // 4610
+  "bop|pol":             3100 + 3640, // 6740
+  "bop|tylo":            3100 + 1500, // 4600
+  "bop|vall":            3100 + 1380, // 4480
+  "laythe|pol":          1510 + 3640, // 5150
+  "laythe|tylo":         1510 + 1500, // 3010
+  "laythe|vall":         1510 + 1380, // 2890
+  "pol|tylo":            3640 + 1500, // 5140
+  "pol|vall":            3640 + 1380, // 5020
+  "tylo|vall":           1500 + 1380, // 2880
+
+  // ── Sarnus system (OPM) ───────────────────────────────────────────────────
+  // Via Low Sarnus Orbit (LSO).  LSO↔moon from leg data:
+  //   Slate: 1000  Tekto: 820  Eeloo: 1480  Ovok: 1160  Hale: 1520
+  "sarnus|slate":          1000,
+  "sarnus|tekto":           820,
+  "eeloo-opm|sarnus":      1480,
+  "ovok|sarnus":           1160,
+  "hale|sarnus":           1520,
+  "slate|tekto":           1000 + 820,  // 1820
+  "eeloo-opm|slate":       1480 + 1000, // 2480
+  "eeloo-opm|tekto":       1480 +  820, // 2300
+  "ovok|slate":            1160 + 1000, // 2160
+  "ovok|tekto":            1160 +  820, // 1980
+  "eeloo-opm|ovok":        1480 + 1160, // 2640
+  "hale|slate":            1520 + 1000, // 2520
+  "hale|tekto":            1520 +  820, // 2340
+  "eeloo-opm|hale":        1480 + 1520, // 3000
+  "hale|ovok":             1520 + 1160, // 2680
+
+  // ── Urlum system (OPM) ────────────────────────────────────────────────────
+  // Via Low Urlum Orbit (LUO).  LUO↔moon from leg data:
+  //   Polta: 780  Priax: 790  Wal: 1480
+  //   Tal orbits Wal: LWO→Tal Transfer = 300 m/s (from leg data)
+  "polta|urlum":          780,
+  "priax|urlum":          790,
+  "urlum|wal":           1480,
+  "polta|priax":          780 +  790, // 1570
+  "polta|wal":            780 + 1480, // 2260
+  "priax|wal":            790 + 1480, // 2270
+  "tal|wal":              300,
+  "polta|tal":            780 + 1480 + 300, // 2560  (LUO→LWO→Tal)
+  "priax|tal":            790 + 1480 + 300, // 2570
+  "tal|urlum":           1480 + 300,        // 1780  (LUO→LWO→Tal reversed)
+
+  // ── Neidon system (OPM) ───────────────────────────────────────────────────
+  // Via Low Neidon Orbit (LNO).  LNO↔moon from leg data:
+  //   Thatmo: 650+660 = 1310  Nissee: 1380 (transfer node ≈ orbit)
+  "neidon|thatmo":       1310,
+  "neidon|nissee":       1380,
+  "nissee|thatmo":       1380 + 1310, // 2690
+
+  // ── Plock system (OPM) ────────────────────────────────────────────────────
+  // LPO→Karen Transfer: 100  (Karen Transfer ≈ low Karen orbit)
+  "karen|plock":          100,
+};
+
+/**
+ * Get the "low orbit" label for a body — the last waypoint before the surface.
+ * For gas giants (no surface) it is the "to" of the last leg; for solid bodies
+ * it is the "from" of the last leg.
+ */
+export function getOrbitLabel(dest: Destination): string {
+  const last = dest.legs[dest.legs.length - 1];
+  return dest.surfaceGravity == null ? last.to : last.from;
+}
+
+/**
  * Build the return legs: same path in reverse.
  * The final leg (landing on Kerbin after aerobraking) costs ~80 m/s.
  */

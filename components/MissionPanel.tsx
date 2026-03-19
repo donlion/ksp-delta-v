@@ -8,6 +8,8 @@ import {
   ISRU_COLORS,
   buildReturnLegs,
   KERBIN_GRAVITY,
+  INTRA_SYSTEM_DV,
+  getOrbitLabel,
   type Leg,
 } from "@/lib/deltav-data";
 import {
@@ -190,67 +192,102 @@ export default function MissionPanel({
   let returnLegs: Leg[];
 
   if (dest && originDest && !isSameAsOrigin) {
-    // Find how many leading legs origin and destination share (e.g. both Jool moons
-    // share the Kerbin→LKO and LKO→Jool Transfer legs, so we route via Jool SOI
-    // instead of bouncing back to Kerbin).
-    let commonLen = 0;
-    while (
-      commonLen < originDest.legs.length &&
-      commonLen < dest.legs.length &&
-      originDest.legs[commonLen].from === dest.legs[commonLen].from &&
-      originDest.legs[commonLen].to === dest.legs[commonLen].to
-    ) {
-      commonLen++;
+    // ── Hardcoded same-system transfer ──────────────────────────────────────
+    // When both bodies share a parent planet, use a pre-computed orbit-to-orbit
+    // Δv rather than deriving it from the Kerbin-to-destination leg data.
+    // This is necessary because some bodies (e.g. Laythe) use an optimised
+    // aero-capture path that bypasses the parent planet's low orbit, making the
+    // common-prefix algorithm produce incorrect intra-system costs.
+    const intraKey = [originId, destId].sort().join("|");
+    const intraDV = INTRA_SYSTEM_DV[intraKey];
+
+    if (intraDV !== undefined) {
+      const originOrbitLabel = getOrbitLabel(originDest);
+      const destOrbitLabel   = getOrbitLabel(dest);
+
+      // Surface departure from origin (reversed last leg)
+      const oSurfLeg = originHasNoSurface ? null : originDest.legs[originDest.legs.length - 1];
+      const dSurfLeg = hasNoSurface       ? null : dest.legs[dest.legs.length - 1];
+
+      const originDep: Leg[] =
+        oSurfLeg && !fromLKO
+          ? [{ from: oSurfLeg.to, to: oSurfLeg.from, deltaV: oSurfLeg.deltaV, canAerobrake: oSurfLeg.canAerobrake }]
+          : [];
+      const transferLeg: Leg = { from: originOrbitLabel, to: destOrbitLabel, deltaV: intraDV };
+      const destArr: Leg[]   = dSurfLeg && !orbitOnly ? [dSurfLeg] : [];
+
+      outboundLegs = [...originDep, transferLeg, ...destArr];
+
+      // Return: dest (surface →) orbit → transfer → orbit (→ origin surface)
+      const retDep: Leg[] =
+        dSurfLeg && !orbitOnly
+          ? [{ from: dSurfLeg.to, to: dSurfLeg.from, deltaV: dSurfLeg.deltaV, canAerobrake: dSurfLeg.canAerobrake }]
+          : [];
+      const retTransfer: Leg = { from: destOrbitLabel, to: originOrbitLabel, deltaV: intraDV };
+      const retArr: Leg[]    = oSurfLeg && !fromLKO ? [oSurfLeg] : [];
+
+      returnLegs = [...retDep, retTransfer, ...retArr];
+    } else {
+      // ── Common-prefix routing ──────────────────────────────────────────────
+      // Find how many leading legs origin and destination share (e.g. both Jool
+      // moons that go via LJO share [Kerbin→LKO, LKO→Jool Transfer, Jool SOI→LJO]),
+      // so we route through the deepest common waypoint instead of LKO.
+      let commonLen = 0;
+      while (
+        commonLen < originDest.legs.length &&
+        commonLen < dest.legs.length &&
+        originDest.legs[commonLen].from === dest.legs[commonLen].from &&
+        originDest.legs[commonLen].to === dest.legs[commonLen].to
+      ) {
+        commonLen++;
+      }
+
+      const originUnique = originDest.legs.slice(commonLen);
+      const destUnique   = dest.legs.slice(commonLen);
+
+      // Origin departure: reverse the unique origin legs
+      const originDepartureFull: Leg[] = [...originUnique].reverse().map((leg) => ({
+        from: leg.to,
+        to: leg.from,
+        deltaV: leg.deltaV,
+        canAerobrake: leg.canAerobrake,
+      }));
+      const originDeparture =
+        fromLKO && !originHasNoSurface
+          ? originDepartureFull.slice(1)
+          : originDepartureFull;
+
+      // Destination arrival
+      const destArrival =
+        !hasNoSurface && !isKerbinDest && orbitOnly
+          ? destUnique.slice(0, -1)
+          : destUnique;
+
+      outboundLegs = [...originDeparture, ...destArrival];
+
+      // Return: destination → junction → origin
+      const destReturnRaw: Leg[] = [...destUnique].reverse().map((leg) => ({
+        from: leg.to,
+        to: leg.from,
+        deltaV: leg.deltaV,
+        canAerobrake: leg.canAerobrake,
+      }));
+      // Fix reversed Kerbin-aerobrake leg: arriving back at Kerbin costs just 80 m/s,
+      // but departing from Kerbin surface costs 3 400 m/s.
+      const destReturnFixed = destReturnRaw.map((leg, i) =>
+        i === 0 && leg.from === "Kerbin Surface" && leg.to === "Low Kerbin Orbit"
+          ? { ...leg, deltaV: 3400, canAerobrake: false }
+          : leg
+      );
+      const destReturn = destReturnFixed.slice(orbitOnly && !isKerbinDest ? 1 : 0);
+
+      const toOrigin =
+        fromLKO && !originHasNoSurface
+          ? originUnique.slice(0, -1)
+          : originUnique;
+
+      returnLegs = [...destReturn, ...toOrigin];
     }
-
-    // Unique legs for each body (everything after the shared prefix)
-    const originUnique = originDest.legs.slice(commonLen);
-    const destUnique = dest.legs.slice(commonLen);
-
-    // Origin departure: reverse the unique origin legs
-    const originDepartureFull: Leg[] = [...originUnique].reverse().map((leg) => ({
-      from: leg.to,
-      to: leg.from,
-      deltaV: leg.deltaV,
-      canAerobrake: leg.canAerobrake,
-    }));
-    // fromLKO = "from origin orbit": skip the first leg (surface → orbit)
-    const originDeparture =
-      fromLKO && !originHasNoSurface
-        ? originDepartureFull.slice(1)
-        : originDepartureFull;
-
-    // Destination arrival: the unique destination legs
-    const destArrival =
-      !hasNoSurface && !isKerbinDest && orbitOnly
-        ? destUnique.slice(0, -1)
-        : destUnique;
-
-    outboundLegs = [...originDeparture, ...destArrival];
-
-    // Return: destination → junction → origin
-    const destReturnRaw: Leg[] = [...destUnique].reverse().map((leg) => ({
-      from: leg.to,
-      to: leg.from,
-      deltaV: leg.deltaV,
-      canAerobrake: leg.canAerobrake,
-    }));
-    // If the first return leg departs Kerbin Surface, it was the aerobrake landing
-    // leg reversed — fix the cost back to the actual launch Δv.
-    const destReturnFixed = destReturnRaw.map((leg, i) =>
-      i === 0 && leg.from === "Kerbin Surface" && leg.to === "Low Kerbin Orbit"
-        ? { ...leg, deltaV: 3400, canAerobrake: false }
-        : leg
-    );
-    const destReturn = destReturnFixed.slice(orbitOnly && !isKerbinDest ? 1 : 0);
-
-    // toOrigin: the unique origin legs (junction → origin body)
-    const toOrigin =
-      fromLKO && !originHasNoSurface
-        ? originUnique.slice(0, -1) // arrive at origin orbit, skip surface landing
-        : originUnique;
-
-    returnLegs = [...destReturn, ...toOrigin];
   } else if (dest) {
     // Default Kerbin origin
     outboundLegs = dest.legs.slice(
