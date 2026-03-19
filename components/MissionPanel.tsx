@@ -226,12 +226,6 @@ export default function MissionPanel({
         >
           Select a destination
         </p>
-        <p
-          className="text-xs font-mono uppercase tracking-widest"
-          style={{ color: "var(--c-hal)", opacity: 0.6 }}
-        >
-          I&apos;m sorry, Dave
-        </p>
         <p className="text-xs font-mono" style={{ color: "var(--c-text3)" }}>
           Click any body on the map
         </p>
