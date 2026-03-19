@@ -4,7 +4,7 @@
 
 /* ── Theme variables ──────────────────────────────────────────────────────── */
 :root {
-  /* Dark — the void of space (default) */
+  /* Void — the void of space (default dark) */
   --c-bg:      #040608;
   --c-surface: #090c13;
   --c-border:  #18243a;
@@ -17,7 +17,7 @@
 }
 
 :root.light {
-  /* Light — Discovery One interior */
+  /* Void light — Discovery One interior */
   --c-bg:      #e8e5df;
   --c-surface: #f0ede7;
   --c-border:  #c4bfb8;
@@ -27,6 +27,102 @@
   --c-text3:   #a09890;
   --c-hal:     #bf2d1c;
   --c-hal-dim: rgba(191, 45, 28, 0.12);
+}
+
+/* ── Interstellar ─────────────────────────────────────────────────────────── */
+:root.theme-interstellar {
+  --c-bg:      #020408;
+  --c-surface: #060c14;
+  --c-border:  #0e1c2c;
+  --c-input:   #091420;
+  --c-text:    #b8ccd8;
+  --c-text2:   #385065;
+  --c-text3:   #162030;
+  --c-hal:     #c8a030;
+  --c-hal-dim: rgba(200, 160, 48, 0.18);
+}
+:root.theme-interstellar.light {
+  --c-bg:      #e8ecf0;
+  --c-surface: #f4f6f8;
+  --c-border:  #c0cad4;
+  --c-input:   #d4dce4;
+  --c-text:    #080c12;
+  --c-text2:   #3c5060;
+  --c-text3:   #8898a8;
+  --c-hal:     #b89020;
+  --c-hal-dim: rgba(184, 144, 32, 0.15);
+}
+
+/* ── SpaceX ───────────────────────────────────────────────────────────────── */
+:root.theme-spacex {
+  --c-bg:      #080808;
+  --c-surface: #101010;
+  --c-border:  #252525;
+  --c-input:   #181818;
+  --c-text:    #eeeeee;
+  --c-text2:   #686868;
+  --c-text3:   #2c2c2c;
+  --c-hal:     #c0392b;
+  --c-hal-dim: rgba(192, 57, 43, 0.18);
+}
+:root.theme-spacex.light {
+  --c-bg:      #f2f2f2;
+  --c-surface: #ffffff;
+  --c-border:  #e0e0e0;
+  --c-input:   #ebebeb;
+  --c-text:    #0a0a0a;
+  --c-text2:   #4a4a4a;
+  --c-text3:   #9a9a9a;
+  --c-hal:     #c0392b;
+  --c-hal-dim: rgba(192, 57, 43, 0.12);
+}
+
+/* ── Blade Runner ─────────────────────────────────────────────────────────── */
+:root.theme-bladerunner {
+  --c-bg:      #02010c;
+  --c-surface: #060312;
+  --c-border:  #160930;
+  --c-input:   #0c0618;
+  --c-text:    #e0c0e8;
+  --c-text2:   #60305a;
+  --c-text3:   #220c28;
+  --c-hal:     #00c8ff;
+  --c-hal-dim: rgba(0, 200, 255, 0.20);
+}
+:root.theme-bladerunner.light {
+  --c-bg:      #f0e4d0;
+  --c-surface: #f8f0e4;
+  --c-border:  #d8c8a8;
+  --c-input:   #ead4b8;
+  --c-text:    #18100a;
+  --c-text2:   #70542c;
+  --c-text3:   #a8906a;
+  --c-hal:     #e07820;
+  --c-hal-dim: rgba(224, 120, 32, 0.18);
+}
+
+/* ── Hitchhiker's Guide ───────────────────────────────────────────────────── */
+:root.theme-hitchhiker {
+  --c-bg:      #010c06;
+  --c-surface: #031208;
+  --c-border:  #0a2814;
+  --c-input:   #061a0e;
+  --c-text:    #c0ead0;
+  --c-text2:   #2c7048;
+  --c-text3:   #0c2e18;
+  --c-hal:     #30d878;
+  --c-hal-dim: rgba(48, 216, 120, 0.18);
+}
+:root.theme-hitchhiker.light {
+  --c-bg:      #f0f8f2;
+  --c-surface: #f8fff9;
+  --c-border:  #b8d8c4;
+  --c-input:   #d4eede;
+  --c-text:    #041208;
+  --c-text2:   #266040;
+  --c-text3:   #70a882;
+  --c-hal:     #1a9050;
+  --c-hal-dim: rgba(26, 144, 80, 0.15);
 }
 
 /* ── Base ─────────────────────────────────────────────────────────────────── */
@@ -60,14 +156,76 @@ body::before {
   transition: opacity 0.4s ease;
 }
 
-:root.light body::before {
-  opacity: 0;
-}
+/* Hide starfield: all light modes, SpaceX dark (minimal), Blade Runner dark (neon fog) */
+:root.light body::before             { opacity: 0; }
+:root.theme-spacex body::before      { opacity: 0; }
+:root.theme-bladerunner body::before { opacity: 0; }
 
 main {
   position: relative;
   z-index: 1;
 }
+
+/* ── Per-theme atmosphere overlays (body::after) ──────────────────────────── */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0; /* behind main */
+}
+
+/* Interstellar dark — faint tesseract gold glow at bottom */
+:root.theme-interstellar body::after {
+  background: radial-gradient(ellipse at 50% 90%, rgba(200,160,48,0.05) 0%, transparent 55%);
+}
+
+/* SpaceX dark — rocket exhaust warmth at bottom */
+:root.theme-spacex body::after {
+  background: radial-gradient(ellipse at 50% 100%, rgba(192,57,43,0.07) 0%, transparent 50%);
+}
+
+/* Blade Runner dark — scanline overlay */
+:root.theme-bladerunner body::after {
+  z-index: 2; /* above main */
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.06) 3px,
+    rgba(0, 0, 0, 0.06) 4px
+  );
+}
+
+/* Hitchhiker dark — subtle green nebula wash */
+:root.theme-hitchhiker body::after {
+  background:
+    radial-gradient(ellipse at 25% 65%, rgba(48,216,120,0.04) 0%, transparent 45%),
+    radial-gradient(ellipse at 75% 25%, rgba(48,216,120,0.03) 0%, transparent 40%);
+}
+
+/* Light modes — no overlay */
+:root.light body::after { display: none; }
+
+/* ── Panel-level effects via data-panel ───────────────────────────────────── */
+
+/* Blade Runner — neon glow on panel borders */
+:root.theme-bladerunner [data-panel] {
+  box-shadow: 0 0 22px rgba(0, 200, 255, 0.07), 0 0 0 1px rgba(0, 200, 255, 0.18);
+}
+:root.theme-bladerunner.light [data-panel] {
+  box-shadow: 0 0 22px rgba(224, 120, 32, 0.10), 0 0 0 1px rgba(224, 120, 32, 0.22);
+}
+
+/* Hitchhiker — rounded, friendly panels */
+:root.theme-hitchhiker [data-panel] {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* ── SpaceX typography — bold, wide-tracked headings ─────────────────────── */
+:root.theme-spacex h1 { letter-spacing: 0.06em; }
+:root.theme-spacex h2 { letter-spacing: 0.04em; font-weight: 900; }
 
 /* ── Range input ──────────────────────────────────────────────────────────── */
 input[type='range'] {
@@ -91,7 +249,6 @@ input[type='range']::-moz-range-thumb {
   border: 2px solid rgba(0,0,0,0.35);
 }
 
-
 /* ── Leg bar stagger animation ────────────────────────────────────────────── */
 @keyframes leg-in {
   from { opacity: 0; transform: translateX(-10px); }
@@ -106,7 +263,11 @@ input[type='range']::-moz-range-thumb {
   opacity: 1;
   transition: opacity 0.4s;
 }
-:root.light .map-vignette {
+:root.light .map-vignette,
+:root.theme-interstellar .map-vignette,
+:root.theme-spacex .map-vignette,
+:root.theme-bladerunner .map-vignette,
+:root.theme-hitchhiker .map-vignette {
   opacity: 0;
 }
 

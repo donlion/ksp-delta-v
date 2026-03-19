@@ -258,6 +258,7 @@ export default function MissionPanel({
 
   return (
     <div
+      data-panel="mission"
       className="overflow-hidden flex flex-col"
       style={
         {

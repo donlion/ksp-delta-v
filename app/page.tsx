@@ -123,7 +123,7 @@ export default function Home() {
         {/* Main layout */}
         <div className="flex flex-col xl:flex-row gap-6 items-start">
           {/* Delta-V map — terminal bezel */}
-          <div className="w-full xl:flex-1 relative" style={{ position: "relative" }}>
+          <div data-panel="map" className="w-full xl:flex-1 relative" style={{ position: "relative" }}>
             <CornerBrackets />
 
             {/* Terminal header strip */}
