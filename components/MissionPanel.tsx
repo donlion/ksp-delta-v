@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   DESTINATIONS,
   BODY_COLORS,
+  DIFFICULTY_COLORS,
   buildReturnLegs,
   KERBIN_GRAVITY,
   type Leg,
@@ -127,6 +128,15 @@ export default function MissionPanel({
   // ── Field notes toggle ────────────────────────────────────────────────────
   const [showNotes, setShowNotes] = useState(false);
 
+  // ── Copy link ─────────────────────────────────────────────────────────────
+  const [copied, setCopied] = useState(false);
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
   // ── Typewriter for destination name ──────────────────────────────────────
   const [displayedName, setDisplayedName] = useState("");
   useEffect(() => {
@@ -212,21 +222,21 @@ export default function MissionPanel({
           border: "1px solid var(--c-border)",
         }}
       >
-        {/* HAL-style eye placeholder */}
+        {/* HAL-style eye placeholder — color adapts to active theme */}
         <div
           className="hal-glow w-14 h-14 rounded-full flex items-center justify-center"
           style={{
             background:
-              "radial-gradient(circle at 40% 38%, #3a0a08 0%, #0a0204 70%)",
-            border: "1.5px solid rgba(191,45,28,0.35)",
+              "radial-gradient(circle at 40% 38%, var(--c-surface) 0%, var(--c-bg) 70%)",
+            border: "1.5px solid var(--c-hal-dim)",
           }}
         >
           <div
             className="w-6 h-6 rounded-full"
             style={{
               background:
-                "radial-gradient(circle at 38% 35%, #e84030 0%, #8a1a10 55%, #3a0a06 100%)",
-              boxShadow: "0 0 8px 3px rgba(191,45,28,0.4)",
+                "radial-gradient(circle at 38% 35%, var(--c-hal) 0%, var(--c-hal-dim) 55%, transparent 100%)",
+              boxShadow: "0 0 8px 3px var(--c-hal-dim)",
             }}
           />
         </div>
@@ -248,6 +258,7 @@ export default function MissionPanel({
 
   return (
     <div
+      data-panel="mission"
       className="overflow-hidden flex flex-col"
       style={
         {
@@ -259,7 +270,7 @@ export default function MissionPanel({
     >
       {/* Colored terminal header strip */}
       <div
-        className="px-4 py-2.5 flex items-baseline justify-between flex-shrink-0"
+        className="px-4 py-2.5 flex items-center justify-between flex-shrink-0"
         style={{
           background: color + "22",
           borderBottom: `1px solid ${color}40`,
@@ -271,11 +282,21 @@ export default function MissionPanel({
         >
           {d.group}
         </span>
-        <span
-          className="text-xs font-mono uppercase tracking-widest"
-          style={{ color: color, opacity: 0.55 }}
-        >
-          Mission Computer
+        <span className="flex items-center gap-3">
+          <button
+            onClick={handleCopyLink}
+            className="text-xs font-mono uppercase tracking-widest cursor-pointer transition-colors"
+            style={{ color: copied ? color : "var(--c-text3)" }}
+            title="Copy shareable link"
+          >
+            {copied ? "✓ Copied" : "Share ↗"}
+          </button>
+          <span
+            className="text-xs font-mono uppercase tracking-widest"
+            style={{ color: color, opacity: 0.55 }}
+          >
+            Mission Computer
+          </span>
         </span>
       </div>
 
@@ -306,6 +327,18 @@ export default function MissionPanel({
               {(d.surfaceGravity / KERBIN_GRAVITY).toFixed(2)} g)
             </p>
           )}
+          <p className="flex items-center gap-1.5 mt-2">
+            <span
+              className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
+              style={{ background: DIFFICULTY_COLORS[d.difficulty] }}
+            />
+            <span
+              className="text-xs font-mono uppercase tracking-widest"
+              style={{ color: DIFFICULTY_COLORS[d.difficulty] }}
+            >
+              {d.difficulty}
+            </span>
+          </p>
         </div>
 
         {/* Toggle switches */}
