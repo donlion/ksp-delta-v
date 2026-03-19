@@ -79,9 +79,9 @@ function LegBar({
       style={{ animationDelay: `${index * 110}ms` }}
     >
       <div className="flex justify-between items-baseline mb-1.5 gap-2">
-        <span className="text-xs truncate" style={{ color: "var(--c-text3)" }}>
+        <span className="text-xs truncate" style={{ color: "var(--c-text2)" }}>
           {leg.from}
-          <span className="mx-1.5" style={{ color: "var(--c-border)" }}>
+          <span className="mx-1.5" style={{ color: "var(--c-text3)" }}>
             →
           </span>
           {leg.to}
@@ -293,7 +293,7 @@ export default function MissionPanel({
           </button>
           <span
             className="text-xs font-mono uppercase tracking-widest"
-            style={{ color: color, opacity: 0.55 }}
+            style={{ color: color, opacity: 0.7 }}
           >
             Mission Computer
           </span>
@@ -442,7 +442,7 @@ export default function MissionPanel({
         >
           <p
             className="text-xs font-mono uppercase tracking-widest mb-2"
-            style={{ color: color, opacity: 0.7 }}
+            style={{ color: color, opacity: 0.85 }}
           >
             Total Mission Δv
           </p>
@@ -502,7 +502,7 @@ export default function MissionPanel({
                     <div key={cat}>
                       <p
                         className="text-xs font-mono uppercase tracking-widest mb-2"
-                        style={{ color: color, opacity: 0.6 }}
+                        style={{ color: color, opacity: 0.75 }}
                       >
                         {TIP_CATEGORY_LABELS[cat]}
                       </p>
@@ -511,7 +511,7 @@ export default function MissionPanel({
                           <li key={i} className="flex gap-2">
                             <span
                               className="text-xs font-mono flex-shrink-0 mt-0.5"
-                              style={{ color: color, opacity: 0.5 }}
+                              style={{ color: color, opacity: 0.6 }}
                             >
                               ›
                             </span>

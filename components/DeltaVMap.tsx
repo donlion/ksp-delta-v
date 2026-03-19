@@ -171,7 +171,7 @@ export default function DeltaVMap({ selected, onSelect }: Props) {
                   x={lx} y={ly}
                   textAnchor="middle" dominantBaseline="middle"
                   style={{ fill: edge.color }}
-                  fontSize={9.5}
+                  fontSize={11}
                   fontFamily="var(--font-space-mono), 'Courier New', monospace"
                   opacity={0.9}
                 >
@@ -257,7 +257,7 @@ export default function DeltaVMap({ selected, onSelect }: Props) {
                 textAnchor={lp.anchor}
                 dominantBaseline="middle"
                 style={{ fill: labelFill }}
-                fontSize={isSel ? 12 : 11}
+                fontSize={isSel ? 13 : 12}
                 fontWeight={isSel ? "700" : "400"}
                 fontFamily="var(--font-space-grotesk), system-ui, sans-serif"
               >
