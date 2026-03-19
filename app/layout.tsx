@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Space_Mono } from "next/font/google";
+import {
+  Space_Grotesk,
+  Space_Mono,
+  Barlow_Condensed,
+  Cinzel,
+  Playfair_Display,
+  Nunito,
+} from "next/font/google";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -11,6 +18,34 @@ const spaceMono = Space_Mono({
   subsets: ["latin"],
   weight: ["400", "700"],
   variable: "--font-space-mono",
+});
+
+/** SpaceX — clean condensed technical sans */
+const barlowCondensed = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-barlow",
+});
+
+/** Blade Runner headings — classical engraved Roman */
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--font-cinzel",
+});
+
+/** Blade Runner body — editorial Victorian serif */
+const playfairDisplay = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-playfair",
+});
+
+/** Hitchhiker's Guide — friendly rounded */
+const nunito = Nunito({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-nunito",
 });
 
 export const metadata: Metadata = {
@@ -29,7 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className={`${spaceGrotesk.variable} ${spaceMono.variable} font-sans`}>
+      <body className={`${spaceGrotesk.variable} ${spaceMono.variable} ${barlowCondensed.variable} ${cinzel.variable} ${playfairDisplay.variable} ${nunito.variable} font-sans`}>
         {children}
       </body>
     </html>
