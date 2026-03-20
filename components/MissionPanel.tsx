@@ -30,6 +30,7 @@ interface Props {
   onToggleOrbitOnly: () => void;
   redundancy: number;
   onRedundancyChange: (v: number) => void;
+  rescale: number;
 }
 
 function ToggleSwitch({
@@ -134,6 +135,7 @@ export default function MissionPanel({
   onToggleOrbitOnly,
   redundancy,
   onRedundancyChange,
+  rescale,
 }: Props) {
   // ── Field notes toggle ────────────────────────────────────────────────────
   const [showNotes, setShowNotes] = useState(false);
@@ -303,7 +305,7 @@ export default function MissionPanel({
     returnLegs = [];
   }
 
-  const allLegs: { label: string; legs: Leg[] }[] = dest && !isSameAsOrigin && !isKerbinNoOrigin
+  const rawLegs: { label: string; legs: Leg[] }[] = dest && !isSameAsOrigin && !isKerbinNoOrigin
     ? isReturn
       ? [
           { label: "Outbound", legs: outboundLegs },
@@ -311,6 +313,16 @@ export default function MissionPanel({
         ]
       : [{ label: "", legs: outboundLegs }]
     : [];
+
+  // Apply system rescale: Δv scales by √rescale
+  const scaleFactor = Math.sqrt(rescale);
+  const allLegs = rescale !== 1
+    ? rawLegs.map((s) => ({
+        ...s,
+        legs: s.legs.map((l) => ({ ...l, deltaV: Math.round(l.deltaV * scaleFactor) })),
+      }))
+    : rawLegs;
+
   const baseDV = allLegs
     .flatMap((s) => s.legs)
     .reduce((s, l) => s + l.deltaV, 0);
@@ -717,6 +729,14 @@ export default function MissionPanel({
             className="h-px w-16 mx-auto mb-3"
             style={{ background: color, opacity: 0.35 }}
           />
+          {rescale !== 1 && (
+            <p
+              className="text-xs font-mono mb-1"
+              style={{ color: "var(--c-text3)" }}
+            >
+              ×{rescale} system · √{rescale} = ×{scaleFactor.toFixed(3)} Δv
+            </p>
+          )}
           {redundancy > 0 && (
             <p
               className="text-xs font-mono mb-1"
