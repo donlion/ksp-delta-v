@@ -16,7 +16,13 @@ export type DestinationGroup =
   | "Sarnus System"
   | "Urlum System"
   | "Neidon System"
-  | "Plock System";
+  | "Plock System"
+  // Real Solar System / 1/4 Scale groups
+  | "Earth System"
+  | "Sol Inner Planets"
+  | "Mars System";
+
+export type ScaleMode = "stock" | "opm" | "quarter" | "rss";
 
 export type DifficultyRating = "Beginner" | "Intermediate" | "Advanced" | "Expert";
 export type IsruViability = "prime" | "viable";
@@ -43,6 +49,10 @@ export interface Destination {
   stockOnly?: boolean;
   /** Only shown when OPM is enabled */
   opmOnly?: boolean;
+  /** Only shown in Real Solar System mode */
+  rssOnly?: boolean;
+  /** Only shown in 1/4 Scale (KSRSS) mode */
+  quarterScaleOnly?: boolean;
   /** Rough mission difficulty based on delta-v, atmosphere, and landing complexity */
   difficulty: DifficultyRating;
   /** Surface gravity in m/s². Omit for Jool (gas giant, no surface). */
@@ -709,6 +719,257 @@ export const DESTINATIONS: Destination[] = [
       { from: "Karen Transfer",   to: "Karen Surface",     deltaV: 30 },
     ],
   },
+
+  // ── Real Solar System (RSS) destinations ──────────────────────────────────
+  // Delta-v values from community RSS delta-v maps. Propulsive only.
+  {
+    id: "rss-earth",
+    name: "Earth",
+    group: "Earth System",
+    rssOnly: true,
+    difficulty: "Beginner",
+    description:
+      "Home. Earth's thick atmosphere enables aerobrake return from LEO for just ~200 m/s. Reaching orbit requires ~9 400 m/s — nearly three times the KSP stock ascent.",
+    surfaceGravity: 9.81,
+    scienceMultiplier: 1,
+    legs: [
+      { from: "Earth Surface", to: "Low Earth Orbit", deltaV: 9400 },
+      { from: "Low Earth Orbit", to: "Earth Surface", deltaV: 200, canAerobrake: true },
+    ],
+  },
+  {
+    id: "rss-moon",
+    name: "Moon",
+    group: "Earth System",
+    rssOnly: true,
+    difficulty: "Intermediate",
+    description:
+      "Earth's natural satellite. No atmosphere — every landing and ascent is purely propulsive. The Apollo missions required ~17 km/s total delta-v.",
+    surfaceGravity: 1.62,
+    scienceMultiplier: 4,
+    isruViability: "viable",
+    legs: [
+      { from: "Earth Surface",            to: "Low Earth Orbit",    deltaV: 9400 },
+      { from: "Low Earth Orbit",           to: "Trans-Lunar Injection", deltaV: 3130 },
+      { from: "Trans-Lunar Injection",     to: "Low Lunar Orbit",   deltaV: 900 },
+      { from: "Low Lunar Orbit",           to: "Moon Surface",      deltaV: 1900 },
+    ],
+  },
+  {
+    id: "rss-venus",
+    name: "Venus",
+    group: "Sol Inner Planets",
+    rssOnly: true,
+    difficulty: "Advanced",
+    description:
+      "Earth's toxic twin. Its thick CO₂ atmosphere allows aerocapture into orbit, but surface conditions (92 atm, 465 °C) make landing an engineering nightmare.",
+    surfaceGravity: 8.87,
+    scienceMultiplier: 7,
+    legs: [
+      { from: "Earth Surface",        to: "Low Earth Orbit",     deltaV: 9400 },
+      { from: "Low Earth Orbit",      to: "Venus Transfer",      deltaV: 640 },
+      { from: "Venus Transfer",       to: "Low Venus Orbit",     deltaV: 250, canAerobrake: true },
+      { from: "Low Venus Orbit",      to: "Venus Surface",       deltaV: 720, canAerobrake: true },
+    ],
+  },
+  {
+    id: "rss-mercury",
+    name: "Mercury",
+    group: "Sol Inner Planets",
+    rssOnly: true,
+    difficulty: "Expert",
+    description:
+      "Innermost planet. No atmosphere means a brutal 4 700 m/s capture burn. Close solar proximity and eccentric orbit make transfers expensive and infrequent.",
+    surfaceGravity: 3.70,
+    scienceMultiplier: 10,
+    isruViability: "viable",
+    legs: [
+      { from: "Earth Surface",         to: "Low Earth Orbit",      deltaV: 9400 },
+      { from: "Low Earth Orbit",       to: "Mercury Transfer",     deltaV: 2100 },
+      { from: "Mercury Transfer",      to: "Low Mercury Orbit",    deltaV: 4700 },
+      { from: "Low Mercury Orbit",     to: "Mercury Surface",      deltaV: 1200 },
+    ],
+  },
+  {
+    id: "rss-mars",
+    name: "Mars",
+    group: "Mars System",
+    rssOnly: true,
+    difficulty: "Intermediate",
+    description:
+      "The Red Planet. Thin atmosphere allows aerocapture to orbit and parachute-assisted landing. First crewed destination beyond the Earth-Moon system.",
+    surfaceGravity: 3.72,
+    scienceMultiplier: 8,
+    isruViability: "viable",
+    legs: [
+      { from: "Earth Surface",         to: "Low Earth Orbit",    deltaV: 9400 },
+      { from: "Low Earth Orbit",       to: "Trans-Mars Injection", deltaV: 900 },
+      { from: "Trans-Mars Injection",  to: "Low Mars Orbit",     deltaV: 900, canAerobrake: true },
+      { from: "Low Mars Orbit",        to: "Mars Surface",       deltaV: 500, canAerobrake: true },
+    ],
+  },
+  {
+    id: "rss-phobos",
+    name: "Phobos",
+    group: "Mars System",
+    rssOnly: true,
+    difficulty: "Expert",
+    description:
+      "Mars's inner moon — a captured asteroid with near-zero gravity. A potential staging outpost for Mars surface operations; landing is essentially just matching orbit.",
+    surfaceGravity: 0.006,
+    scienceMultiplier: 9,
+    isruViability: "prime",
+    legs: [
+      { from: "Earth Surface",         to: "Low Earth Orbit",    deltaV: 9400 },
+      { from: "Low Earth Orbit",       to: "Trans-Mars Injection", deltaV: 900 },
+      { from: "Trans-Mars Injection",  to: "Low Mars Orbit",     deltaV: 900, canAerobrake: true },
+      { from: "Low Mars Orbit",        to: "Phobos Surface",     deltaV: 1250 },
+    ],
+  },
+  {
+    id: "rss-deimos",
+    name: "Deimos",
+    group: "Mars System",
+    rssOnly: true,
+    difficulty: "Expert",
+    description:
+      "Mars's outer moon. More distant and harder to reach from LMO than Phobos, but its near-escape trajectory makes it attractive as a deep-space waypoint.",
+    surfaceGravity: 0.003,
+    scienceMultiplier: 9,
+    isruViability: "prime",
+    legs: [
+      { from: "Earth Surface",         to: "Low Earth Orbit",    deltaV: 9400 },
+      { from: "Low Earth Orbit",       to: "Trans-Mars Injection", deltaV: 900 },
+      { from: "Trans-Mars Injection",  to: "Low Mars Orbit",     deltaV: 900, canAerobrake: true },
+      { from: "Low Mars Orbit",        to: "Deimos Surface",     deltaV: 1750 },
+    ],
+  },
+
+  // ── 1/4 Scale (KSRSS) destinations ────────────────────────────────────────
+  // Delta-v values for Real Solar System at 1/4 scale (KSRSS mod).
+  // Orbital velocities are roughly 1/2 of full RSS values.
+  {
+    id: "q-earth",
+    name: "Earth",
+    group: "Earth System",
+    quarterScaleOnly: true,
+    difficulty: "Beginner",
+    description:
+      "Home at 1/4 scale. Orbital requirements are intermediate between stock KSP and full RSS — around 4 750 m/s to LEO.",
+    surfaceGravity: 9.81,
+    scienceMultiplier: 1,
+    legs: [
+      { from: "Earth Surface", to: "Low Earth Orbit", deltaV: 4750 },
+      { from: "Low Earth Orbit", to: "Earth Surface", deltaV: 100, canAerobrake: true },
+    ],
+  },
+  {
+    id: "q-moon",
+    name: "Moon",
+    group: "Earth System",
+    quarterScaleOnly: true,
+    difficulty: "Beginner",
+    description:
+      "Earth's natural satellite at 1/4 scale. Lower delta-v than full RSS but still demands careful mission planning.",
+    surfaceGravity: 1.62,
+    scienceMultiplier: 4,
+    isruViability: "viable",
+    legs: [
+      { from: "Earth Surface",             to: "Low Earth Orbit",       deltaV: 4750 },
+      { from: "Low Earth Orbit",           to: "Trans-Lunar Injection", deltaV: 1560 },
+      { from: "Trans-Lunar Injection",     to: "Low Lunar Orbit",       deltaV: 450 },
+      { from: "Low Lunar Orbit",           to: "Moon Surface",          deltaV: 950 },
+    ],
+  },
+  {
+    id: "q-venus",
+    name: "Venus",
+    group: "Sol Inner Planets",
+    quarterScaleOnly: true,
+    difficulty: "Advanced",
+    description:
+      "Venus at 1/4 scale. The atmosphere still provides aerocapture savings, but surface conditions remain hostile.",
+    surfaceGravity: 8.87,
+    scienceMultiplier: 7,
+    legs: [
+      { from: "Earth Surface",    to: "Low Earth Orbit",  deltaV: 4750 },
+      { from: "Low Earth Orbit",  to: "Venus Transfer",   deltaV: 320 },
+      { from: "Venus Transfer",   to: "Low Venus Orbit",  deltaV: 130, canAerobrake: true },
+      { from: "Low Venus Orbit",  to: "Venus Surface",    deltaV: 360, canAerobrake: true },
+    ],
+  },
+  {
+    id: "q-mercury",
+    name: "Mercury",
+    group: "Sol Inner Planets",
+    quarterScaleOnly: true,
+    difficulty: "Expert",
+    description:
+      "Mercury at 1/4 scale. Still demands a costly capture burn with no atmosphere to help.",
+    surfaceGravity: 3.70,
+    scienceMultiplier: 10,
+    isruViability: "viable",
+    legs: [
+      { from: "Earth Surface",      to: "Low Earth Orbit",    deltaV: 4750 },
+      { from: "Low Earth Orbit",    to: "Mercury Transfer",   deltaV: 1050 },
+      { from: "Mercury Transfer",   to: "Low Mercury Orbit",  deltaV: 2350 },
+      { from: "Low Mercury Orbit",  to: "Mercury Surface",    deltaV: 600 },
+    ],
+  },
+  {
+    id: "q-mars",
+    name: "Mars",
+    group: "Mars System",
+    quarterScaleOnly: true,
+    difficulty: "Intermediate",
+    description:
+      "Mars at 1/4 scale. The thin atmosphere still enables aerocapture and parachute landings.",
+    surfaceGravity: 3.72,
+    scienceMultiplier: 8,
+    isruViability: "viable",
+    legs: [
+      { from: "Earth Surface",        to: "Low Earth Orbit",      deltaV: 4750 },
+      { from: "Low Earth Orbit",      to: "Trans-Mars Injection", deltaV: 450 },
+      { from: "Trans-Mars Injection", to: "Low Mars Orbit",       deltaV: 450, canAerobrake: true },
+      { from: "Low Mars Orbit",       to: "Mars Surface",         deltaV: 500, canAerobrake: true },
+    ],
+  },
+  {
+    id: "q-phobos",
+    name: "Phobos",
+    group: "Mars System",
+    quarterScaleOnly: true,
+    difficulty: "Expert",
+    description:
+      "Phobos at 1/4 scale. Microgravity body — a great staging point for Mars surface missions.",
+    surfaceGravity: 0.006,
+    scienceMultiplier: 9,
+    isruViability: "prime",
+    legs: [
+      { from: "Earth Surface",        to: "Low Earth Orbit",      deltaV: 4750 },
+      { from: "Low Earth Orbit",      to: "Trans-Mars Injection", deltaV: 450 },
+      { from: "Trans-Mars Injection", to: "Low Mars Orbit",       deltaV: 450, canAerobrake: true },
+      { from: "Low Mars Orbit",       to: "Phobos Surface",       deltaV: 625 },
+    ],
+  },
+  {
+    id: "q-deimos",
+    name: "Deimos",
+    group: "Mars System",
+    quarterScaleOnly: true,
+    difficulty: "Expert",
+    description:
+      "Deimos at 1/4 scale. More distant from Mars than Phobos; useful as a deep-space waypoint.",
+    surfaceGravity: 0.003,
+    scienceMultiplier: 9,
+    isruViability: "prime",
+    legs: [
+      { from: "Earth Surface",        to: "Low Earth Orbit",      deltaV: 4750 },
+      { from: "Low Earth Orbit",      to: "Trans-Mars Injection", deltaV: 450 },
+      { from: "Trans-Mars Injection", to: "Low Mars Orbit",       deltaV: 450, canAerobrake: true },
+      { from: "Low Mars Orbit",       to: "Deimos Surface",       deltaV: 875 },
+    ],
+  },
 ];
 
 export const DESTINATION_GROUPS: DestinationGroup[] = [
@@ -721,6 +982,10 @@ export const DESTINATION_GROUPS: DestinationGroup[] = [
   "Urlum System",
   "Neidon System",
   "Plock System",
+  // RSS / 1/4-scale groups
+  "Earth System",
+  "Sol Inner Planets",
+  "Mars System",
 ];
 
 /** Per-body accent colors (matches DeltaVMap node strokes) */
@@ -741,6 +1006,14 @@ export const BODY_COLORS: Record<string, string> = {
   bop:        "#806040",
   pol:        "#c0a060",
   eeloo:      "#a0c0e0",
+  // RSS / 1/4-scale (real solar system bodies; shared between rss- and q- prefixes)
+  earth:      "#4070d0",
+  moon:       "#909090",
+  venus:      "#d4a840",
+  mercury:    "#b09068",
+  mars:       "#c04040",
+  phobos:     "#808070",
+  deimos:     "#908878",
   // OPM
   sarnus:     "#c8b470",
   slate:      "#708090",
@@ -865,11 +1138,13 @@ export function buildReturnLegs(legs: Leg[]): Leg[] {
     deltaV: leg.deltaV,
     canAerobrake: leg.canAerobrake,
   }));
-  // Override the last leg: arriving at Kerbin only costs a deorbit burn;
+  // Override the last leg: arriving at Kerbin/Earth only costs a deorbit burn;
   // the atmosphere handles the rest.
   const last = reversed[reversed.length - 1];
   if (last.to === "Kerbin Surface") {
     reversed[reversed.length - 1] = { ...last, deltaV: 80, canAerobrake: true };
+  } else if (last.to === "Earth Surface") {
+    reversed[reversed.length - 1] = { ...last, deltaV: 200, canAerobrake: true };
   }
   return reversed;
 }

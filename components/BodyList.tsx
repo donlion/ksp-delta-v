@@ -1,6 +1,7 @@
 "use client";
 
 import { BODY_COLORS } from "@/lib/deltav-data";
+import type { ScaleMode } from "@/lib/deltav-data";
 
 type SubMoonEntry = { id: string; name: string };
 type MoonEntry = { id: string; name: string; subsatellites?: SubMoonEntry[] };
@@ -48,24 +49,45 @@ const OPM_SOLAR_SYSTEM: BodyEntry[] = [
   { id: "plock",  name: "Plock",  moons: [{ id: "karen",  name: "Karen" }] },
 ];
 
+// Used for both RSS and 1/4-scale modes; ID prefix differs ("rss-" vs "q-")
+function makeRssSolarSystem(prefix: string): BodyEntry[] {
+  return [
+    { id: `${prefix}sol`, name: "Sol" },
+    { id: `${prefix}mercury`, name: "Mercury" },
+    { id: `${prefix}venus`,   name: "Venus" },
+    { id: `${prefix}earth`,   name: "Earth", moons: [{ id: `${prefix}moon`, name: "Moon" }] },
+    { id: `${prefix}mars`,    name: "Mars",  moons: [{ id: `${prefix}phobos`, name: "Phobos" },
+                                                      { id: `${prefix}deimos`, name: "Deimos" }] },
+  ];
+}
+
 // Non-selectable bodies (no mission data)
-const NON_DEST = new Set(["kerbol"]);
+const NON_DEST = new Set(["kerbol", "rss-sol", "q-sol"]);
+
+/** Strip rss-/q- prefix for BODY_COLORS lookup so colors are shared. */
+function bodyColor(id: string): string | undefined {
+  return BODY_COLORS[id] ?? BODY_COLORS[id.replace(/^(rss-|q-)/, "")];
+}
 
 interface Props {
   selected: string | null;
   onSelect: (id: string) => void;
-  opmEnabled: boolean;
+  scaleMode: ScaleMode;
 }
 
-export default function BodyList({ selected, onSelect, opmEnabled }: Props) {
-  const SOLAR_SYSTEM = opmEnabled ? OPM_SOLAR_SYSTEM : STOCK_SOLAR_SYSTEM;
+export default function BodyList({ selected, onSelect, scaleMode }: Props) {
+  const SOLAR_SYSTEM =
+    scaleMode === "opm"     ? OPM_SOLAR_SYSTEM :
+    scaleMode === "rss"     ? makeRssSolarSystem("rss-") :
+    scaleMode === "quarter" ? makeRssSolarSystem("q-") :
+    STOCK_SOLAR_SYSTEM;
 
   return (
     <div className="font-mono text-sm select-none" style={{ color: "var(--c-text2)" }}>
       {SOLAR_SYSTEM.map((body) => {
         const isSelectable = !NON_DEST.has(body.id);
         const isSelected = selected === body.id;
-        const color = BODY_COLORS[body.id];
+        const color = bodyColor(body.id);
 
         return (
           <div key={body.id}>
@@ -91,7 +113,7 @@ export default function BodyList({ selected, onSelect, opmEnabled }: Props) {
 
             {body.moons?.map((moon) => {
               const moonSelected = selected === moon.id;
-              const moonColor = BODY_COLORS[moon.id];
+              const moonColor = bodyColor(moon.id);
               return (
                 <div key={moon.id}>
                   <div
@@ -114,7 +136,7 @@ export default function BodyList({ selected, onSelect, opmEnabled }: Props) {
 
                   {moon.subsatellites?.map((sub) => {
                     const subSelected = selected === sub.id;
-                    const subColor = BODY_COLORS[sub.id];
+                    const subColor = bodyColor(sub.id);
                     return (
                       <div
                         key={sub.id}

@@ -111,7 +111,6 @@ export default function ThemeToggle() {
             background: "var(--c-surface)",
             border: "1px solid var(--c-border)",
             padding: "6px 10px",
-            minWidth: 172,
           }}
         >
           {/* Swatch */}
@@ -119,7 +118,8 @@ export default function ThemeToggle() {
             className="inline-block rounded-full flex-shrink-0"
             style={{ width: 8, height: 8, background: theme.accent, boxShadow: `0 0 5px ${theme.accent}` }}
           />
-          <span className="flex flex-col items-start flex-1 min-w-0 text-left">
+          {/* Label — hidden on narrow screens */}
+          <span className="hidden sm:flex flex-col items-start min-w-0 text-left" style={{ width: 120 }}>
             <span className="text-xs font-mono uppercase tracking-widest leading-tight"
               style={{ color: "var(--c-text)" }}>
               {theme.label}
