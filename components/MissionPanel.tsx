@@ -236,8 +236,8 @@ export default function MissionPanel({
       // LKO is wrong — it adds a full Kerbin round-trip that never happens.
       // Instead route: origin moon orbit → origin planet orbit → interplanetary
       // transfer → dest planet orbit → dest moon orbit.
-      const originParentId = MOON_PARENT_PLANET[originId];
-      const destParentId   = MOON_PARENT_PLANET[destinationId];
+      const originParentId = MOON_PARENT_PLANET[originDest.id];
+      const destParentId   = MOON_PARENT_PLANET[dest.id];
       const interKey =
         originParentId && destParentId && originParentId !== destParentId
           ? [originParentId, destParentId].sort().join("|")
@@ -257,8 +257,8 @@ export default function MissionPanel({
         const originOrbitLbl = getOrbitLabel(originDest);
         const destOrbitLbl   = getOrbitLabel(dest);
 
-        const originMoonToPlanetDV = getMoonToParentDV(originId, originParentId, originDest, originPlanetOrbitLbl);
-        const destMoonToPlanetDV   = getMoonToParentDV(destinationId, destParentId, dest, destPlanetOrbitLbl);
+        const originMoonToPlanetDV = getMoonToParentDV(originDest.id, originParentId, originDest, originPlanetOrbitLbl);
+        const destMoonToPlanetDV   = getMoonToParentDV(dest.id, destParentId, dest, destPlanetOrbitLbl);
 
         // canAerobrake reflects whether the destination planet has an atmosphere
         const interCanAerobrake =
