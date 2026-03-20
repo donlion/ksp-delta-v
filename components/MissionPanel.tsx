@@ -20,6 +20,7 @@ import {
   TIP_CATEGORY_LABELS,
   type TipCategory,
 } from "@/lib/destination-tips";
+import { isDefaultRescale } from "@/lib/rescale";
 
 interface Props {
   destinationId: string | null;
@@ -386,7 +387,7 @@ export default function MissionPanel({
 
   // Apply system rescale: Δv scales by √rescale
   const scaleFactor = Math.sqrt(rescale);
-  const allLegs = rescale !== 1
+  const allLegs = !isDefaultRescale(rescale)
     ? rawLegs.map((s) => ({
         ...s,
         legs: s.legs.map((l) => ({ ...l, deltaV: Math.round(l.deltaV * scaleFactor) })),
@@ -799,7 +800,7 @@ export default function MissionPanel({
             className="h-px w-16 mx-auto mb-3"
             style={{ background: color, opacity: 0.35 }}
           />
-          {rescale !== 1 && (
+          {!isDefaultRescale(rescale) && (
             <p
               className="text-xs font-mono mb-1"
               style={{ color: "var(--c-text3)" }}

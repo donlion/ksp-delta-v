@@ -2,6 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ScaleMode } from "@/lib/deltav-data";
+import {
+  RESCALE_MAX,
+  RESCALE_MIN,
+  clampRescale,
+  isDefaultRescale,
+} from "@/lib/rescale";
 
 interface Props {
   scaleMode: ScaleMode;
@@ -62,6 +68,11 @@ function ToggleOption({ checked, onChange, label, description }: ToggleOptionPro
 }
 
 export default function SettingsToggle({ scaleMode, onScaleChange, rescale, onRescaleChange }: Props) {
+  const [scaleDraft, setScaleDraft] = useState(String(rescale));
+
+  useEffect(() => {
+    setScaleDraft(String(rescale));
+  }, [rescale]);
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -167,33 +178,46 @@ export default function SettingsToggle({ scaleMode, onScaleChange, rescale, onRe
               System Scale
             </span>
             <span className="font-mono leading-snug block mt-0.5" style={{ fontSize: 9, color: "var(--c-text3)" }}>
-              Δv scales by √factor · 2× system = ×1.41 Δv
+              Δv scales by √factor · e.g. 2× → ×1.41 Δv · 0.25× → ×0.5 Δv
             </span>
             <div className="flex items-center gap-2 mt-2">
               <input
                 type="number"
-                min={1}
-                max={100}
-                step={0.5}
-                value={rescale}
+                min={RESCALE_MIN}
+                max={RESCALE_MAX}
+                step="any"
+                value={scaleDraft}
                 onChange={(e) => {
-                  const v = parseFloat(e.target.value);
-                  if (!isNaN(v) && v >= 1) onRescaleChange(v);
+                  const s = e.target.value;
+                  setScaleDraft(s);
+                  const v = parseFloat(s);
+                  if (Number.isNaN(v)) return;
+                  if (v >= RESCALE_MIN && v <= RESCALE_MAX) onRescaleChange(v);
+                }}
+                onBlur={() => {
+                  const v = parseFloat(scaleDraft);
+                  if (Number.isNaN(v)) {
+                    setScaleDraft(String(rescale));
+                    return;
+                  }
+                  const c = clampRescale(v);
+                  onRescaleChange(c);
+                  setScaleDraft(String(c));
                 }}
                 className="font-mono text-xs"
                 style={{
-                  width: 64,
+                  width: 72,
                   padding: "3px 6px",
                   background: "var(--c-bg)",
-                  border: `1px solid ${rescale !== 1 ? "var(--c-hal)" : "var(--c-border)"}`,
-                  color: rescale !== 1 ? "var(--c-hal)" : "var(--c-text)",
+                  border: `1px solid ${!isDefaultRescale(rescale) ? "var(--c-hal)" : "var(--c-border)"}`,
+                  color: !isDefaultRescale(rescale) ? "var(--c-hal)" : "var(--c-text)",
                   outline: "none",
                 }}
               />
               <span className="font-mono" style={{ fontSize: 9, color: "var(--c-text3)" }}>
                 ×{Math.sqrt(rescale).toFixed(3)} on Δv
               </span>
-              {rescale !== 1 && (
+              {!isDefaultRescale(rescale) && (
                 <button
                   onClick={() => onRescaleChange(1)}
                   className="font-mono text-xs cursor-pointer"
