@@ -8,6 +8,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import SettingsToggle from "@/components/SettingsToggle";
 import { DESTINATIONS } from "@/lib/deltav-data";
 import type { ScaleMode } from "@/lib/deltav-data";
+import { clampRescale, isDefaultRescale } from "@/lib/rescale";
 
 /** Four L-shaped corner brackets in HAL red */
 function CornerBrackets() {
@@ -69,9 +70,10 @@ export default function Home() {
   });
 
   function handleRescaleChange(v: number) {
-    setRescale(v);
-    if (v === 1) localStorage.removeItem("ksp-rescale");
-    else localStorage.setItem("ksp-rescale", String(v));
+    const c = clampRescale(v);
+    setRescale(c);
+    if (isDefaultRescale(c)) localStorage.removeItem("ksp-rescale");
+    else localStorage.setItem("ksp-rescale", String(c));
   }
 
   function handleScaleChange(mode: ScaleMode) {
@@ -103,7 +105,7 @@ export default function Home() {
     const storedRescale = localStorage.getItem("ksp-rescale");
     if (storedRescale) {
       const r = parseFloat(storedRescale);
-      if (!isNaN(r) && r >= 1) setRescale(r);
+      if (!Number.isNaN(r)) setRescale(clampRescale(r));
     }
 
     const params = new URLSearchParams(window.location.search);
@@ -123,7 +125,7 @@ export default function Home() {
     const scaleParam = params.get("scale");
     if (scaleParam) {
       const r = parseFloat(scaleParam);
-      if (!isNaN(r) && r >= 1) setRescale(r);
+      if (!Number.isNaN(r)) setRescale(clampRescale(r));
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -136,7 +138,7 @@ export default function Home() {
     if (fromLKO) params.set("lko", "1");
     if (orbitOnly) params.set("orb", "1");
     if (redundancy > 0) params.set("margin", String(redundancy));
-    if (rescale !== 1) params.set("scale", String(rescale));
+    if (!isDefaultRescale(rescale)) params.set("scale", String(rescale));
     const qs = params.toString();
     window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
   }, [selected, originId, isReturn, fromLKO, orbitOnly, redundancy, rescale]);
