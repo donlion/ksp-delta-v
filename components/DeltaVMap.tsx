@@ -18,7 +18,8 @@ interface EdgeDef {
   to: string;
   color: string;
   width?: number;
-  dvLabel?: string;
+  /** Raw Δv in m/s — scaled at render time by √rescale */
+  dv?: number;
   /** 0–1 fraction along the edge where the label sits (default 0.5) */
   labelAt?: number;
 }
@@ -87,59 +88,59 @@ const OPM_NODES: Record<string, NodeDef> = {
 // ── Edge connections ──────────────────────────────────────────────────────────
 const EDGES: EdgeDef[] = [
   // Spine
-  { from: "kerbin",   to: "lko",      color: "#4070d0", width: 3,   dvLabel: "3,400" },
+  { from: "kerbin",   to: "lko",      color: "#4070d0", width: 3,   dv: 3400 },
   { from: "lko",      to: "transfer", color: "#4060a0", width: 2 },
 
   // Kerbin system
-  { from: "lko",      to: "mun",      color: "#808080", width: 2,   dvLabel: "1,170", labelAt: 0.55 },
-  { from: "lko",      to: "minmus",   color: "#50a060", width: 2,   dvLabel: "1,090", labelAt: 0.55 },
+  { from: "lko",      to: "mun",      color: "#808080", width: 2,   dv: 1170, labelAt: 0.55 },
+  { from: "lko",      to: "minmus",   color: "#50a060", width: 2,   dv: 1090, labelAt: 0.55 },
 
   // Inner planets
-  { from: "transfer", to: "moho",     color: "#c8a050", width: 2,   dvLabel: "3,170", labelAt: 0.42 },
-  { from: "transfer", to: "eve",      color: "#8050c0", width: 2,   dvLabel: "2,380", labelAt: 0.42 },
-  { from: "eve",      to: "gilly",    color: "#a070d0", width: 1.5, dvLabel: "90" },
+  { from: "transfer", to: "moho",     color: "#c8a050", width: 2,   dv: 3170, labelAt: 0.42 },
+  { from: "transfer", to: "eve",      color: "#8050c0", width: 2,   dv: 2380, labelAt: 0.42 },
+  { from: "eve",      to: "gilly",    color: "#a070d0", width: 1.5, dv: 90 },
 
   // Middle system
-  { from: "transfer", to: "duna",     color: "#c04040", width: 2,   dvLabel: "1,440", labelAt: 0.42 },
-  { from: "duna",     to: "ike",      color: "#808080", width: 1.5, dvLabel: "210" },
-  { from: "transfer", to: "dres",     color: "#a0a0a0", width: 2,   dvLabel: "1,900", labelAt: 0.42 },
+  { from: "transfer", to: "duna",     color: "#c04040", width: 2,   dv: 1440, labelAt: 0.42 },
+  { from: "duna",     to: "ike",      color: "#808080", width: 1.5, dv: 210 },
+  { from: "transfer", to: "dres",     color: "#a0a0a0", width: 2,   dv: 1900, labelAt: 0.42 },
 
   // Jool system
-  { from: "transfer", to: "jool",     color: "#40a030", width: 2.5, dvLabel: "4,735", labelAt: 0.45 },
-  { from: "jool",     to: "laythe",   color: "#4080c0", width: 1.5, dvLabel: "1,510", labelAt: 0.45 },
-  { from: "jool",     to: "tylo",     color: "#c0c080", width: 1.5, dvLabel: "1,500", labelAt: 0.45 },
-  { from: "jool",     to: "vall",     color: "#60b0b0", width: 1.5, dvLabel: "1,380", labelAt: 0.45 },
-  { from: "jool",     to: "bop",      color: "#806040", width: 1.5, dvLabel: "3,100", labelAt: 0.45 },
-  { from: "jool",     to: "pol",      color: "#c0a060", width: 1.5, dvLabel: "3,640", labelAt: 0.45 },
+  { from: "transfer", to: "jool",     color: "#40a030", width: 2.5, dv: 4735, labelAt: 0.45 },
+  { from: "jool",     to: "laythe",   color: "#4080c0", width: 1.5, dv: 1510, labelAt: 0.45 },
+  { from: "jool",     to: "tylo",     color: "#c0c080", width: 1.5, dv: 1500, labelAt: 0.45 },
+  { from: "jool",     to: "vall",     color: "#60b0b0", width: 1.5, dv: 1380, labelAt: 0.45 },
+  { from: "jool",     to: "bop",      color: "#806040", width: 1.5, dv: 3100, labelAt: 0.45 },
+  { from: "jool",     to: "pol",      color: "#c0a060", width: 1.5, dv: 3640, labelAt: 0.45 },
 ];
 
 // Stock-only edges (hidden in OPM mode)
 const STOCK_EDGES: EdgeDef[] = [
-  { from: "transfer", to: "eeloo",    color: "#a0c0e0", width: 2,   dvLabel: "3,100", labelAt: 0.4 },
+  { from: "transfer", to: "eeloo",    color: "#a0c0e0", width: 2,   dv: 3100, labelAt: 0.4 },
 ];
 
 // OPM-only edges
 const OPM_EDGES: EdgeDef[] = [
   // Sarnus system
-  { from: "transfer", to: "sarnus",      color: "#c8b470", width: 2.5, dvLabel: "2,420", labelAt: 0.6 },
-  { from: "sarnus",   to: "tekto",       color: "#5090a8", width: 1.5, dvLabel: "820" },
-  { from: "sarnus",   to: "slate",       color: "#708090", width: 1.5, dvLabel: "1,000" },
-  { from: "sarnus",   to: "eeloo-opm",   color: "#a0c0e0", width: 1.5, dvLabel: "1,480" },
-  { from: "sarnus",   to: "ovok",        color: "#c8b080", width: 1.5, dvLabel: "1,160" },
-  { from: "sarnus",   to: "hale",        color: "#a08060", width: 1.5, dvLabel: "1,520" },
+  { from: "transfer", to: "sarnus",      color: "#c8b470", width: 2.5, dv: 2420, labelAt: 0.6 },
+  { from: "sarnus",   to: "tekto",       color: "#5090a8", width: 1.5, dv: 820 },
+  { from: "sarnus",   to: "slate",       color: "#708090", width: 1.5, dv: 1000 },
+  { from: "sarnus",   to: "eeloo-opm",   color: "#a0c0e0", width: 1.5, dv: 1480 },
+  { from: "sarnus",   to: "ovok",        color: "#c8b080", width: 1.5, dv: 1160 },
+  { from: "sarnus",   to: "hale",        color: "#a08060", width: 1.5, dv: 1520 },
   // Plock system
-  { from: "transfer", to: "plock",       color: "#c8c0d8", width: 2,   dvLabel: "3,340", labelAt: 0.55 },
-  { from: "plock",    to: "karen",       color: "#d0c0b8", width: 1.5, dvLabel: "130" },
+  { from: "transfer", to: "plock",       color: "#c8c0d8", width: 2,   dv: 3340, labelAt: 0.55 },
+  { from: "plock",    to: "karen",       color: "#d0c0b8", width: 1.5, dv: 130 },
   // Urlum system
-  { from: "transfer", to: "urlum",       color: "#60a8c0", width: 2.5, dvLabel: "4,360", labelAt: 0.62 },
-  { from: "urlum",    to: "polta",       color: "#90a8b8", width: 1.5, dvLabel: "780" },
-  { from: "urlum",    to: "priax",       color: "#a0b0c0", width: 1.5, dvLabel: "790" },
-  { from: "urlum",    to: "wal",         color: "#7090a8", width: 1.5, dvLabel: "1,480" },
-  { from: "wal",      to: "tal",         color: "#98b0c0", width: 1.5, dvLabel: "330" },
+  { from: "transfer", to: "urlum",       color: "#60a8c0", width: 2.5, dv: 4360, labelAt: 0.62 },
+  { from: "urlum",    to: "polta",       color: "#90a8b8", width: 1.5, dv: 780 },
+  { from: "urlum",    to: "priax",       color: "#a0b0c0", width: 1.5, dv: 790 },
+  { from: "urlum",    to: "wal",         color: "#7090a8", width: 1.5, dv: 1480 },
+  { from: "wal",      to: "tal",         color: "#98b0c0", width: 1.5, dv: 330 },
   // Neidon system
-  { from: "transfer", to: "neidon",      color: "#4060c0", width: 2.5, dvLabel: "4,900", labelAt: 0.65 },
-  { from: "neidon",   to: "thatmo",      color: "#607888", width: 1.5, dvLabel: "1,310" },
-  { from: "neidon",   to: "nissee",      color: "#b0b8c8", width: 1.5, dvLabel: "1,410" },
+  { from: "transfer", to: "neidon",      color: "#4060c0", width: 2.5, dv: 4900, labelAt: 0.65 },
+  { from: "neidon",   to: "thatmo",      color: "#607888", width: 1.5, dv: 1310 },
+  { from: "neidon",   to: "nissee",      color: "#b0b8c8", width: 1.5, dv: 1410 },
 ];
 
 // Selectable destinations (stock)
@@ -174,13 +175,15 @@ interface Props {
   selected: string | null;
   onSelect: (id: string) => void;
   scaleMode: "stock" | "opm" | "quarter" | "rss";
+  rescale: number;
 }
 
-export default function DeltaVMap({ selected, onSelect, scaleMode }: Props) {
+export default function DeltaVMap({ selected, onSelect, scaleMode, rescale }: Props) {
   const [hovered, setHovered] = useState<string | null>(null);
   const [bloomed, setBloomed] = useState<Set<string>>(new Set());
 
   const opmEnabled = scaleMode === "opm";
+  const scaleFactor = Math.sqrt(rescale);
   const allNodes = opmEnabled ? { ...NODES, ...OPM_NODES } : NODES;
   const activeEdges = opmEnabled
     ? [...EDGES, ...OPM_EDGES]
@@ -233,7 +236,10 @@ export default function DeltaVMap({ selected, onSelect, scaleMode }: Props) {
         const p = edge.labelAt ?? 0.5;
         const lx = f.x + p * (t.x - f.x);
         const ly = f.y + p * (t.y - f.y);
-        const labelW = edge.dvLabel ? Math.max(28, edge.dvLabel.length * 6 + 10) : 0;
+        const scaledLabel = edge.dv != null
+          ? Math.round(edge.dv * scaleFactor).toLocaleString()
+          : null;
+        const labelW = scaledLabel ? Math.max(28, scaledLabel.length * 6 + 10) : 0;
 
         return (
           <g key={i}>
@@ -244,7 +250,7 @@ export default function DeltaVMap({ selected, onSelect, scaleMode }: Props) {
               strokeLinecap="round"
               opacity={0.75}
             />
-            {edge.dvLabel && (
+            {scaledLabel && (
               <>
                 <rect
                   x={lx - labelW / 2} y={ly - 9}
@@ -261,7 +267,7 @@ export default function DeltaVMap({ selected, onSelect, scaleMode }: Props) {
                   fontFamily="var(--font-space-mono), 'Courier New', monospace"
                   opacity={0.9}
                 >
-                  {edge.dvLabel}
+                  {scaledLabel}
                 </text>
               </>
             )}

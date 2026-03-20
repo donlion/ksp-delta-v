@@ -248,7 +248,7 @@ export default function Home() {
             >
               {mapView === "map" ? (
                 <>
-                  <DeltaVMap selected={selected} onSelect={setSelected} scaleMode={scaleMode} />
+                  <DeltaVMap selected={selected} onSelect={setSelected} scaleMode={scaleMode} rescale={rescale} />
                   {/* CRT vignette */}
                   <div
                     className="map-vignette"
