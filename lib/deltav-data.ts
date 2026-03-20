@@ -764,89 +764,84 @@ export const BODY_COLORS: Record<string, string> = {
  * Hardcoded orbit-to-orbit delta-v for same-system transfers.
  * Key: sorted body IDs joined by "|". Value: Δv in m/s.
  *
- * Kerbin system: via LKO as hub.
- * Jool system: via Low Jool Orbit (LJO) as hub; map edge labels used for LJO↔moon.
- *   Laythe values MUST be hardcoded — Laythe's legs data bypasses LJO (direct Jool
- *   SOI Entry aero-capture), which breaks the common-prefix routing algorithm for
- *   any Laythe↔other-Jool-moon pair.
- * OPM systems: via the parent planet's low orbit as hub; values derived from leg data.
+ * Sources:
+ *  • Vanilla KSP moon pairs: blaarkies/ksp-visual-calculator (delta-v-graph.ts),
+ *    formula: ejectDv + planeChangeDv + captureDv (direct Hohmann/bielliptic).
+ *    Propulsive costs only — no aerocapture savings applied.
+ *  • Jool↔moon costs: community delta-v map edge labels (include aerocapture for
+ *    Laythe). jool|laythe MUST be hardcoded — Laythe's legs bypass LJO via a direct
+ *    SOI-entry aerocapture, breaking the common-prefix routing algorithm.
+ *  • OPM Sarnus moon pairs: Kowgan ksp_cheat_sheets OPM delta-v map (v1.8.1),
+ *    average of forward/reverse eject+capture costs from the SVG data.
+ *  • OPM Urlum / Neidon / Plock: derived from existing leg data (parent-orbit hub).
  */
 export const INTRA_SYSTEM_DV: Record<string, number> = {
-  // ── Kerbin system ─────────────────────────────────────────────────────────
-  // Via LKO: LMO→LKO = 310+860 = 1170, LKO→LMinO = 930+160 = 1090
-  "minmus|mun":          1170 + 1090, // 2260
+  // ── Kerbin system (blaarkies: eject 215 + plane 2 + capture 85) ──────────
+  "minmus|mun":          310,
 
-  // ── Eve system ────────────────────────────────────────────────────────────
-  // From leg data: LEvO→Gilly Transfer: 60, GT→LGO: 30
-  "eve|gilly":           60 + 30,     // 90
+  // ── Eve system (blaarkies: LEvO→LGO ≈ 1 484 m/s propulsive) ─────────────
+  // The 60+30 m/s in the leg data is the incremental cost from an Eve intercept
+  // trajectory, not from a circular low Eve orbit.
+  "eve|gilly":          1480,
 
-  // ── Duna system ───────────────────────────────────────────────────────────
-  // From leg data: LDO→Ike Transfer: 30, IT→LIO: 180
-  "duna|ike":            30 + 180,    // 210
+  // ── Duna system (blaarkies: LDO→LIO ≈ 413 m/s) ───────────────────────────
+  "duna|ike":            410,
 
-  // ── Jool system ───────────────────────────────────────────────────────────
-  // LJO↔moon costs (community delta-v map):
-  //   Laythe: 1510  Tylo: 1500  Vall: 1380  Bop: 3100  Pol: 3640
-  "bop|jool":            3100,
-  "jool|laythe":         1510,
-  "jool|pol":            3640,
-  "jool|tylo":           1500,
-  "jool|vall":           1380,
-  "bop|laythe":          3100 + 1510, // 4610
-  "bop|pol":             3100 + 3640, // 6740
-  "bop|tylo":            3100 + 1500, // 4600
-  "bop|vall":            3100 + 1380, // 4480
-  "laythe|pol":          1510 + 3640, // 5150
-  "laythe|tylo":         1510 + 1500, // 3010
-  "laythe|vall":         1510 + 1380, // 2890
-  "pol|tylo":            3640 + 1500, // 5140
-  "pol|vall":            3640 + 1380, // 5020
-  "tylo|vall":           1500 + 1380, // 2880
+  // ── Jool system — moon pairs (blaarkies direct transfer values) ───────────
+  // Much cheaper than routing via LJO (which would give 2 880–6 740 m/s).
+  "bop|laythe":         1190,  // 404 + 2 + 787
+  "bop|pol":             260,  // 75  + 2 + 182
+  "bop|tylo":           1010,  // 109 + 2 + 894
+  "bop|vall":            790,  // 304 + 2 + 483
+  "laythe|pol":         1220,  // 416 + 2 + 797
+  "laythe|tylo":        1500,  // 848 + 2 + 649
+  "laythe|vall":         960,  // 330 + 2 + 628
+  "pol|tylo":           1030,  // 178 + 2 + 846
+  "pol|vall":            800,  // 303 + 2 + 495
+  "tylo|vall":          1190,  // 830 + 2 + 357
 
-  // ── Sarnus system (OPM) ───────────────────────────────────────────────────
-  // Via Low Sarnus Orbit (LSO).  LSO↔moon from leg data:
-  //   Slate: 1000  Tekto: 820  Eeloo: 1480  Ovok: 1160  Hale: 1520
-  "sarnus|slate":          1000,
-  "sarnus|tekto":           820,
-  "eeloo-opm|sarnus":      1480,
-  "ovok|sarnus":           1160,
-  "hale|sarnus":           1520,
-  "slate|tekto":           1000 + 820,  // 1820
-  "eeloo-opm|slate":       1480 + 1000, // 2480
-  "eeloo-opm|tekto":       1480 +  820, // 2300
-  "ovok|slate":            1160 + 1000, // 2160
-  "ovok|tekto":            1160 +  820, // 1980
-  "eeloo-opm|ovok":        1480 + 1160, // 2640
-  "hale|slate":            1520 + 1000, // 2520
-  "hale|tekto":            1520 +  820, // 2340
-  "eeloo-opm|hale":        1480 + 1520, // 3000
-  "hale|ovok":             1520 + 1160, // 2680
+  // ── Jool system — Jool↔moon (community delta-v map, LJO costs) ───────────
+  // Tylo/Vall/Bop/Pol also computed correctly by common-prefix algorithm, but
+  // hardcoded here for explicitness. jool|laythe cannot be derived algorithmically.
+  "bop|jool":           3100,  // LJO→Bop: 2200+900
+  "jool|laythe":        1510,  // community map (aerocapture at Laythe)
+  "jool|pol":           3640,  // LJO→Pol: 2820+820
+  "jool|tylo":          1500,  // LJO→Tylo: 400+1100
+  "jool|vall":          1380,  // LJO→Vall: 620+760
 
-  // ── Urlum system (OPM) ────────────────────────────────────────────────────
-  // Via Low Urlum Orbit (LUO).  LUO↔moon from leg data:
-  //   Polta: 780  Priax: 790  Wal: 1480
-  //   Tal orbits Wal: LWO→Tal Transfer = 300 m/s (from leg data)
-  "polta|urlum":          780,
-  "priax|urlum":          790,
-  "urlum|wal":           1480,
-  "polta|priax":          780 +  790, // 1570
-  "polta|wal":            780 + 1480, // 2260
-  "priax|wal":            790 + 1480, // 2270
-  "tal|wal":              300,
-  "polta|tal":            780 + 1480 + 300, // 2560  (LUO→LWO→Tal)
-  "priax|tal":            790 + 1480 + 300, // 2570
-  "tal|urlum":           1480 + 300,        // 1780  (LUO→LWO→Tal reversed)
+  // ── Sarnus system (OPM) — moon pairs (Kowgan SVG, avg of both directions) ─
+  // Eject/capture from SVG: Hale(540/70), Ovok(650/100), Eeloo(1120/160),
+  //                         Slate(1460/155), Tekto(1540/630).
+  "hale|ovok":           680,  // (540+100 + 650+70) / 2
+  "eeloo-opm|hale":      950,  // (540+160 + 1120+70) / 2
+  "hale|slate":         1110,  // (540+155 + 1460+70) / 2
+  "hale|tekto":         1390,  // (540+630 + 1540+70) / 2
+  "eeloo-opm|ovok":     1020,  // (650+160 + 1120+100) / 2
+  "ovok|slate":         1180,  // (650+155 + 1460+100) / 2
+  "ovok|tekto":         1460,  // (650+630 + 1540+100) / 2
+  "eeloo-opm|slate":    1450,  // (1120+155 + 1460+160) / 2
+  "eeloo-opm|tekto":    1730,  // (1120+630 + 1540+160) / 2
+  "slate|tekto":        1890,  // (1460+630 + 1540+155) / 2
+  // Sarnus↔moon handled correctly by common-prefix algorithm (all share legs to LSO).
+
+  // ── Urlum system (OPM) — via Low Urlum Orbit hub (leg data) ──────────────
+  // LUO↔moon: Polta 780, Priax 790, Wal 1480. Tal orbits Wal (LWO→Tal = 300).
+  "polta|priax":        1570,  // 780 + 790
+  "polta|wal":          2260,  // 780 + 1480
+  "priax|wal":          2270,  // 790 + 1480
+  "tal|wal":             300,
+  "polta|tal":          2560,  // 780 + 1480 + 300  (via LUO then LWO)
+  "priax|tal":          2570,  // 790 + 1480 + 300
+  "tal|urlum":          1780,  // 300 + 1480
+  // Urlum↔moon handled correctly by common-prefix algorithm.
 
   // ── Neidon system (OPM) ───────────────────────────────────────────────────
-  // Via Low Neidon Orbit (LNO).  LNO↔moon from leg data:
-  //   Thatmo: 650+660 = 1310  Nissee: 1380 (transfer node ≈ orbit)
-  "neidon|thatmo":       1310,
-  "neidon|nissee":       1380,
-  "nissee|thatmo":       1380 + 1310, // 2690
+  // Kowgan SVG: Thatmo↔Nissee ~850–930 m/s (avg ~890). Via-LNO gives 2 690 m/s.
+  "nissee|thatmo":       890,
+  // Neidon↔moon handled correctly by common-prefix algorithm.
 
   // ── Plock system (OPM) ────────────────────────────────────────────────────
-  // LPO→Karen Transfer: 100  (Karen Transfer ≈ low Karen orbit)
-  "karen|plock":          100,
+  "karen|plock":         100,  // LPO→Karen Transfer (from leg data)
 };
 
 /**

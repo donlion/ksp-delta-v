@@ -198,7 +198,7 @@ export default function MissionPanel({
     // This is necessary because some bodies (e.g. Laythe) use an optimised
     // aero-capture path that bypasses the parent planet's low orbit, making the
     // common-prefix algorithm produce incorrect intra-system costs.
-    const intraKey = [originId, destId].sort().join("|");
+    const intraKey = [originId, destinationId].sort().join("|");
     const intraDV = INTRA_SYSTEM_DV[intraKey];
 
     if (intraDV !== undefined) {
