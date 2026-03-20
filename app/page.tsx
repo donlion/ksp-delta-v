@@ -58,6 +58,7 @@ export default function Home() {
   const [orbitOnly, setOrbitOnly] = useState(false);
   const [redundancy, setRedundancy] = useState(0);
   const [scaleMode, setScaleMode] = useState<ScaleMode>("stock");
+  const [rescale, setRescale] = useState(1);
 
   const activeDestinations = DESTINATIONS.filter((d) => {
     if (scaleMode === "stock")   return !d.opmOnly && !d.rssOnly && !d.quarterScaleOnly;
@@ -66,6 +67,12 @@ export default function Home() {
     if (scaleMode === "quarter") return d.quarterScaleOnly === true;
     return false;
   });
+
+  function handleRescaleChange(v: number) {
+    setRescale(v);
+    if (v === 1) localStorage.removeItem("ksp-rescale");
+    else localStorage.setItem("ksp-rescale", String(v));
+  }
 
   function handleScaleChange(mode: ScaleMode) {
     const prev = scaleMode;
@@ -93,6 +100,12 @@ export default function Home() {
     const mode: ScaleMode = stored && ["stock", "opm", "quarter", "rss"].includes(stored) ? stored : "stock";
     if (mode !== "stock") setScaleMode(mode);
 
+    const storedRescale = localStorage.getItem("ksp-rescale");
+    if (storedRescale) {
+      const r = parseFloat(storedRescale);
+      if (!isNaN(r) && r >= 1) setRescale(r);
+    }
+
     const params = new URLSearchParams(window.location.search);
     const d = params.get("d");
     if (d && DESTINATIONS.find((dest) => dest.id === d)) {
@@ -107,6 +120,11 @@ export default function Home() {
     if (params.get("orb") === "1") setOrbitOnly(true);
     const margin = params.get("margin");
     if (margin) setRedundancy(Math.min(50, Math.max(0, Number(margin))));
+    const scaleParam = params.get("scale");
+    if (scaleParam) {
+      const r = parseFloat(scaleParam);
+      if (!isNaN(r) && r >= 1) setRescale(r);
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Sync state → URL ──────────────────────────────────────────────────────
@@ -118,9 +136,10 @@ export default function Home() {
     if (fromLKO) params.set("lko", "1");
     if (orbitOnly) params.set("orb", "1");
     if (redundancy > 0) params.set("margin", String(redundancy));
+    if (rescale !== 1) params.set("scale", String(rescale));
     const qs = params.toString();
     window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
-  }, [selected, originId, isReturn, fromLKO, orbitOnly, redundancy]);
+  }, [selected, originId, isReturn, fromLKO, orbitOnly, redundancy, rescale]);
 
   // ── Keyboard navigation ───────────────────────────────────────────────────
   useEffect(() => {
@@ -159,7 +178,7 @@ export default function Home() {
             </p>
           </div>
           <div className="flex items-start gap-2">
-            <SettingsToggle scaleMode={scaleMode} onScaleChange={handleScaleChange} />
+            <SettingsToggle scaleMode={scaleMode} onScaleChange={handleScaleChange} rescale={rescale} onRescaleChange={handleRescaleChange} />
             <ThemeToggle />
           </div>
         </header>
@@ -268,6 +287,7 @@ export default function Home() {
               onToggleOrbitOnly={() => setOrbitOnly((v) => !v)}
               redundancy={redundancy}
               onRedundancyChange={setRedundancy}
+              rescale={rescale}
             />
           </div>
         </div>

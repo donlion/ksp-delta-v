@@ -60,28 +60,28 @@ const NODES: Record<string, NodeDef> = {
 // ── OPM-only node positions ──────────────────────────────────────────────────
 const OPM_NODES: Record<string, NodeDef> = {
   // Sarnus system
-  sarnus:      { x: 1020, y: 245, label: "Sarnus", r: 16, stroke: "#c8b470", labelDir: "above" },
+  sarnus:      { x: 1020, y: 275, label: "Sarnus", r: 16, stroke: "#c8b470", labelDir: "above" },
   tekto:       { x: 1100, y:  80, label: "Tekto",  r: 11, stroke: "#5090a8", labelDir: "above" },
-  slate:       { x: 1120, y: 145, label: "Slate",  r: 13, stroke: "#708090", labelDir: "right" },
-  "eeloo-opm": { x: 1115, y: 215, label: "Eeloo",  r: 12, stroke: "#a0c0e0", labelDir: "right" },
-  ovok:        { x: 1105, y: 300, label: "Ovok",   r:  9, stroke: "#c8b080", labelDir: "right" },
-  hale:        { x: 1090, y: 360, label: "Hale",   r:  7, stroke: "#a08060", labelDir: "right" },
+  slate:       { x: 1125, y: 165, label: "Slate",  r: 13, stroke: "#708090", labelDir: "right" },
+  "eeloo-opm": { x: 1120, y: 265, label: "Eeloo",  r: 12, stroke: "#a0c0e0", labelDir: "right" },
+  ovok:        { x: 1110, y: 365, label: "Ovok",   r:  9, stroke: "#c8b080", labelDir: "right" },
+  hale:        { x: 1095, y: 460, label: "Hale",   r:  7, stroke: "#a08060", labelDir: "right" },
 
   // Plock system
-  plock:       { x: 1070, y: 450, label: "Plock",  r: 10, stroke: "#c8c0d8", labelDir: "below" },
-  karen:       { x: 1140, y: 450, label: "Karen",  r:  7, stroke: "#d0c0b8", labelDir: "right" },
+  plock:       { x: 1075, y: 565, label: "Plock",  r: 10, stroke: "#c8c0d8", labelDir: "below" },
+  karen:       { x: 1155, y: 565, label: "Karen",  r:  7, stroke: "#d0c0b8", labelDir: "right" },
 
   // Urlum system
-  urlum:       { x: 1265, y: 255, label: "Urlum",  r: 15, stroke: "#60a8c0", labelDir: "above" },
-  polta:       { x: 1340, y: 175, label: "Polta",  r: 10, stroke: "#90a8b8", labelDir: "right" },
-  priax:       { x: 1355, y: 255, label: "Priax",  r:  9, stroke: "#a0b0c0", labelDir: "right" },
-  wal:         { x: 1345, y: 340, label: "Wal",    r: 12, stroke: "#7090a8", labelDir: "right" },
-  tal:         { x: 1410, y: 375, label: "Tal",    r:  7, stroke: "#98b0c0", labelDir: "right" },
+  urlum:       { x: 1270, y: 285, label: "Urlum",  r: 15, stroke: "#60a8c0", labelDir: "above" },
+  polta:       { x: 1350, y: 165, label: "Polta",  r: 10, stroke: "#90a8b8", labelDir: "right" },
+  priax:       { x: 1365, y: 285, label: "Priax",  r:  9, stroke: "#a0b0c0", labelDir: "right" },
+  wal:         { x: 1355, y: 410, label: "Wal",    r: 12, stroke: "#7090a8", labelDir: "right" },
+  tal:         { x: 1425, y: 465, label: "Tal",    r:  7, stroke: "#98b0c0", labelDir: "right" },
 
   // Neidon system
-  neidon:      { x: 1460, y: 210, label: "Neidon", r: 15, stroke: "#4060c0", labelDir: "above" },
-  thatmo:      { x: 1530, y: 145, label: "Thatmo", r: 11, stroke: "#607888", labelDir: "right" },
-  nissee:      { x: 1545, y: 260, label: "Nissee", r:  7, stroke: "#b0b8c8", labelDir: "right" },
+  neidon:      { x: 1465, y: 235, label: "Neidon", r: 15, stroke: "#4060c0", labelDir: "above" },
+  thatmo:      { x: 1540, y: 155, label: "Thatmo", r: 11, stroke: "#607888", labelDir: "right" },
+  nissee:      { x: 1555, y: 295, label: "Nissee", r:  7, stroke: "#b0b8c8", labelDir: "right" },
 };
 
 // ── Edge connections ──────────────────────────────────────────────────────────
@@ -206,7 +206,7 @@ export default function DeltaVMap({ selected, onSelect, scaleMode }: Props) {
     );
   }
 
-  const viewBox = opmEnabled ? "0 0 1600 570" : "0 0 920 570";
+  const viewBox = opmEnabled ? "0 0 1600 750" : "0 0 920 570";
 
   return (
     <svg

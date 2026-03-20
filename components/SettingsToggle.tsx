@@ -6,6 +6,8 @@ import type { ScaleMode } from "@/lib/deltav-data";
 interface Props {
   scaleMode: ScaleMode;
   onScaleChange: (mode: ScaleMode) => void;
+  rescale: number;
+  onRescaleChange: (v: number) => void;
 }
 
 interface ToggleOptionProps {
@@ -59,7 +61,7 @@ function ToggleOption({ checked, onChange, label, description }: ToggleOptionPro
   );
 }
 
-export default function SettingsToggle({ scaleMode, onScaleChange }: Props) {
+export default function SettingsToggle({ scaleMode, onScaleChange, rescale, onRescaleChange }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -157,6 +159,51 @@ export default function SettingsToggle({ scaleMode, onScaleChange }: Props) {
             label="Real Solar System"
             description="Full-scale RSS · ~9 400 m/s to orbit"
           />
+
+          {/* System Scale */}
+          <div style={{ height: 1, background: "var(--c-border)", margin: "0 12px" }} />
+          <div style={{ padding: "10px 12px" }}>
+            <span className="text-xs font-mono uppercase tracking-widest" style={{ color: "var(--c-text3)" }}>
+              System Scale
+            </span>
+            <span className="font-mono leading-snug block mt-0.5" style={{ fontSize: 9, color: "var(--c-text3)" }}>
+              Δv scales by √factor · 2× system = ×1.41 Δv
+            </span>
+            <div className="flex items-center gap-2 mt-2">
+              <input
+                type="number"
+                min={1}
+                max={100}
+                step={0.5}
+                value={rescale}
+                onChange={(e) => {
+                  const v = parseFloat(e.target.value);
+                  if (!isNaN(v) && v >= 1) onRescaleChange(v);
+                }}
+                className="font-mono text-xs"
+                style={{
+                  width: 64,
+                  padding: "3px 6px",
+                  background: "var(--c-bg)",
+                  border: `1px solid ${rescale !== 1 ? "var(--c-hal)" : "var(--c-border)"}`,
+                  color: rescale !== 1 ? "var(--c-hal)" : "var(--c-text)",
+                  outline: "none",
+                }}
+              />
+              <span className="font-mono" style={{ fontSize: 9, color: "var(--c-text3)" }}>
+                ×{Math.sqrt(rescale).toFixed(3)} on Δv
+              </span>
+              {rescale !== 1 && (
+                <button
+                  onClick={() => onRescaleChange(1)}
+                  className="font-mono text-xs cursor-pointer"
+                  style={{ color: "var(--c-text3)", marginLeft: "auto" }}
+                >
+                  reset
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
