@@ -5,6 +5,9 @@ out/
 # Node
 node_modules/
 
+# Claude Code (local overrides)
+.claude/settings.local.json
+
 # Misc
 .DS_Store
 *.env*

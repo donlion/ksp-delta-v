@@ -9,6 +9,9 @@ import {
   buildReturnLegs,
   KERBIN_GRAVITY,
   INTRA_SYSTEM_DV,
+  INTER_SYSTEM_DV,
+  MOON_PARENT_PLANET,
+  getMoonToParentDV,
   getOrbitLabel,
   type Leg,
 } from "@/lib/deltav-data";
@@ -230,6 +233,72 @@ export default function MissionPanel({
 
       returnLegs = [...retDep, retTransfer, ...retArr];
     } else {
+      // ── Cross-system moon-to-moon routing ──────────────────────────────────
+      // When both bodies are moons of different non-Kerbin planets, routing via
+      // LKO is wrong — it adds a full Kerbin round-trip that never happens.
+      // Instead route: origin moon orbit → origin planet orbit → interplanetary
+      // transfer → dest planet orbit → dest moon orbit.
+      const originParentId = MOON_PARENT_PLANET[originDest.id];
+      const destParentId   = MOON_PARENT_PLANET[dest.id];
+      const interKey =
+        originParentId && destParentId && originParentId !== destParentId
+          ? [originParentId, destParentId].sort().join("|")
+          : null;
+      const interDV = interKey !== null ? INTER_SYSTEM_DV[interKey] : undefined;
+
+      if (interDV !== undefined && originParentId && destParentId) {
+        const originParentDest = DESTINATIONS.find((d) => d.id === originParentId) ?? null;
+        const destParentDest   = DESTINATIONS.find((d) => d.id === destParentId)   ?? null;
+        const originPlanetOrbitLbl = originParentDest
+          ? getOrbitLabel(originParentDest)
+          : `Low ${originParentId} Orbit`;
+        const destPlanetOrbitLbl = destParentDest
+          ? getOrbitLabel(destParentDest)
+          : `Low ${destParentId} Orbit`;
+
+        const originOrbitLbl = getOrbitLabel(originDest);
+        const destOrbitLbl   = getOrbitLabel(dest);
+
+        const originMoonToPlanetDV = getMoonToParentDV(originDest.id, originParentId, originDest, originPlanetOrbitLbl);
+        const destMoonToPlanetDV   = getMoonToParentDV(dest.id, destParentId, dest, destPlanetOrbitLbl);
+
+        // canAerobrake reflects whether the destination planet has an atmosphere
+        const interCanAerobrake =
+          destParentDest?.legs.find((l) => l.to === destPlanetOrbitLbl)?.canAerobrake ?? false;
+        const retInterCanAerobrake =
+          originParentDest?.legs.find((l) => l.to === originPlanetOrbitLbl)?.canAerobrake ?? false;
+
+        const oSurfLeg = originHasNoSurface ? null : originDest.legs[originDest.legs.length - 1];
+        const dSurfLeg = hasNoSurface       ? null : dest.legs[dest.legs.length - 1];
+
+        const originDepSurf: Leg[] =
+          oSurfLeg && !fromLKO
+            ? [{ from: oSurfLeg.to, to: oSurfLeg.from, deltaV: oSurfLeg.deltaV, canAerobrake: oSurfLeg.canAerobrake }]
+            : [];
+        const destArrSurf: Leg[] = dSurfLeg && !orbitOnly ? [dSurfLeg] : [];
+
+        outboundLegs = [
+          ...originDepSurf,
+          { from: originOrbitLbl,      to: originPlanetOrbitLbl, deltaV: originMoonToPlanetDV },
+          { from: originPlanetOrbitLbl, to: destPlanetOrbitLbl,  deltaV: interDV, canAerobrake: interCanAerobrake },
+          { from: destPlanetOrbitLbl,  to: destOrbitLbl,          deltaV: destMoonToPlanetDV },
+          ...destArrSurf,
+        ];
+
+        const destRetDepSurf: Leg[] =
+          dSurfLeg && !orbitOnly
+            ? [{ from: dSurfLeg.to, to: dSurfLeg.from, deltaV: dSurfLeg.deltaV, canAerobrake: dSurfLeg.canAerobrake }]
+            : [];
+        const retOriginSurf: Leg[] = oSurfLeg && !fromLKO ? [oSurfLeg] : [];
+
+        returnLegs = [
+          ...destRetDepSurf,
+          { from: destOrbitLbl,        to: destPlanetOrbitLbl,   deltaV: destMoonToPlanetDV },
+          { from: destPlanetOrbitLbl,  to: originPlanetOrbitLbl, deltaV: interDV, canAerobrake: retInterCanAerobrake },
+          { from: originPlanetOrbitLbl, to: originOrbitLbl,      deltaV: originMoonToPlanetDV },
+          ...retOriginSurf,
+        ];
+      } else {
       // ── Common-prefix routing ──────────────────────────────────────────────
       // Find how many leading legs origin and destination share (e.g. both Jool
       // moons that go via LJO share [Kerbin→LKO, LKO→Jool Transfer, Jool SOI→LJO]),
@@ -289,7 +358,8 @@ export default function MissionPanel({
           : originUnique;
 
       returnLegs = [...destReturn, ...toOrigin];
-    }
+      } // end common-prefix
+    } // end else (no intra-system DV)
   } else if (dest) {
     // Default Kerbin origin
     outboundLegs = dest.legs.slice(
