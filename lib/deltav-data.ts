@@ -1118,6 +1118,112 @@ export const INTRA_SYSTEM_DV: Record<string, number> = {
 };
 
 /**
+ * Maps each moon ID to the ID of the non-Kerbin planet it orbits.
+ * Used to detect cross-system transfers (moon of planet A ↔ moon of planet B).
+ */
+export const MOON_PARENT_PLANET: Record<string, string> = {
+  // Stock
+  gilly:      "eve",
+  ike:        "duna",
+  laythe:     "jool",
+  vall:       "jool",
+  tylo:       "jool",
+  bop:        "jool",
+  pol:        "jool",
+  // OPM — Sarnus system
+  slate:      "sarnus",
+  tekto:      "sarnus",
+  ovok:       "sarnus",
+  hale:       "sarnus",
+  "eeloo-opm": "sarnus",
+  // OPM — Urlum system (Tal orbits Wal which orbits Urlum; treat Urlum as parent)
+  polta:      "urlum",
+  priax:      "urlum",
+  wal:        "urlum",
+  tal:        "urlum",
+  // OPM — Neidon system
+  thatmo:     "neidon",
+  nissee:     "neidon",
+  // OPM — Plock system
+  karen:      "plock",
+};
+
+/**
+ * Direct planet-to-planet transfer costs (Low Planet Orbit → Low Planet Orbit),
+ * propulsive only, minimum-energy Hohmann transfer with Oberth effect.
+ *
+ * Calculated from KSP/OPM orbital parameters (vis-viva + Oberth):
+ *   v_∞ = |v_planet_helio − v_transfer_at_planet|
+ *   Δv  = sqrt(v_c² + v_∞²) − v_c   (ejection/capture burn at LPO)
+ *
+ * Key format: "planet1|planet2" (alphabetically sorted), value in m/s.
+ *
+ * Stock planet parameters used (SMA / GM / radius):
+ *   Eve   9.832e9 m / 8.1718e12 / 700 km   LO r=800 km  v_c=3196 m/s
+ *   Duna  2.067e10 m / 3.0136e11 / 320 km  LO r=420 km  v_c= 847 m/s
+ *   Jool  6.836e10 m / 2.8253e14 / 6000 km LO r=6200 km v_c=6751 m/s
+ * OPM planet parameters (approximate):
+ *   Sarnus  1.25e11 m / 5.1286e14 / 5300 km  LO r=5500 km  v_c=9655 m/s
+ *   Urlum   2.70e11 m / 8.8789e13 / 2500 km  LO r=2700 km  v_c=5734 m/s
+ *   Neidon  4.09e11 m / 9.1744e13 / 2500 km  LO r=2700 km  v_c=5829 m/s
+ *   Plock   5.35e11 m / 1.7848e11 /  189 km  LO r= 289 km  v_c= 786 m/s
+ */
+export const INTER_SYSTEM_DV: Record<string, number> = {
+  // ── Stock cross-system pairs ──────────────────────────────────────────────
+  "duna|eve":        1330,  // Eve ejection 470 + Duna capture 860
+  "eve|jool":        1860,  // Jool ejection 305 + Eve capture 1555
+  "duna|jool":       1270,  // Jool ejection 126 + Duna capture 1144
+
+  // ── Stock ↔ OPM ───────────────────────────────────────────────────────────
+  "eve|sarnus":      2070,  // Eve ejection 1887 + Sarnus capture  183
+  "duna|sarnus":     1750,  // Duna ejection 1638 + Sarnus capture  112
+  "jool|sarnus":       40,  // Jool ejection   24 + Sarnus capture   13
+  "eve|urlum":       2330,  // Eve ejection 2123 + Urlum capture   207
+  "duna|urlum":      2160,  // Duna ejection 2016 + Urlum capture   145
+  "jool|urlum":       140,  // Jool ejection   87 + Urlum capture    53
+  "sarnus|urlum":      30,  // Sarnus ejection 14 + Urlum capture    16
+  "eve|neidon":      2350,  // Eve ejection 2197 + Neidon capture   153
+  "duna|neidon":     2250,  // Duna ejection 2135 + Neidon capture  115
+  "jool|neidon":      170,  // Jool ejection  119 + Neidon capture   51
+  "sarnus|neidon":     55,  // Sarnus ejection 28 + Neidon capture   27
+  "neidon|urlum":       6,  // Both giants — near-zero Oberth burns
+  "eve|plock":       2880,  // Eve ejection 2229 + Plock capture    649
+  "duna|plock":      2740,  // Duna ejection 2193 + Plock capture   547
+  "jool|plock":       460,  // Jool ejection  137 + Plock capture   323
+  "sarnus|plock":     220,  // Sarnus ejection 37 + Plock capture   183
+  "neidon|plock":      10,  // Neidon ejection  1 + Plock capture     8
+  "plock|urlum":       55,  // Urlum ejection   9 + Plock capture    45
+};
+
+/**
+ * Cost (m/s) to transfer between a moon's low orbit and its parent planet's
+ * low orbit. Checks INTRA_SYSTEM_DV first (needed for Gilly and Ike where the
+ * leg data only encodes incremental costs from an intercept trajectory, not
+ * from a circular planet orbit); falls back to summing the moon's own leg data.
+ */
+export function getMoonToParentDV(
+  moonId: string,
+  parentPlanetId: string,
+  moonDest: Destination,
+  planetOrbitLabel: string,
+): number {
+  const key = [moonId, parentPlanetId].sort().join("|");
+  if (INTRA_SYSTEM_DV[key] !== undefined) return INTRA_SYSTEM_DV[key];
+
+  // Derive from leg data: sum legs from planetOrbitLabel to the moon's orbit
+  const moonOrbitLabel = getOrbitLabel(moonDest);
+  const legs = moonDest.legs;
+  const startIdx = legs.findIndex((l) => l.to === planetOrbitLabel);
+  if (startIdx === -1) return 0;
+  let cost = 0;
+  for (let i = startIdx + 1; i < legs.length; i++) {
+    cost += legs[i].deltaV;
+    if (legs[i].to === moonOrbitLabel) break;
+  }
+  return cost;
+}
+
+/**
  * Get the "low orbit" label for a body — the last waypoint before the surface.
  * For gas giants (no surface) it is the "to" of the last leg; for solid bodies
  * it is the "from" of the last leg.
