@@ -154,7 +154,8 @@ export default function Home() {
               KSP <span style={{ color: "var(--c-hal)" }}>Δv</span>
             </h1>
             <p className="text-void-text3 text-xs mt-2 uppercase tracking-widest font-mono">
-              Mission Delta‑V Planner · Kerbal Space Program 1
+              <span className="sm:hidden">Δv Planner · KSP 1</span>
+              <span className="hidden sm:inline">Mission Delta‑V Planner · Kerbal Space Program 1</span>
             </p>
           </div>
           <div className="flex items-start gap-2">
