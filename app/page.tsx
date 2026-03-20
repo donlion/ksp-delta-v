@@ -50,6 +50,7 @@ function CornerBrackets() {
 
 export default function Home() {
   const [selected, setSelected] = useState<string | null>(null);
+  const [originId, setOriginId] = useState<string | null>(null);
   const [mapView, setMapView] = useState<"map" | "list">("map");
   const [isReturn, setIsReturn] = useState(false);
   const [fromLKO, setFromLKO] = useState(false);
@@ -67,10 +68,14 @@ export default function Home() {
     // Swap Eeloo between stock and OPM versions seamlessly
     if (enabled && selected === "eeloo") setSelected("eeloo-opm");
     if (!enabled && selected === "eeloo-opm") setSelected("eeloo");
+    if (enabled && originId === "eeloo") setOriginId("eeloo-opm");
+    if (!enabled && originId === "eeloo-opm") setOriginId("eeloo");
     // Deselect any other OPM-only destination when turning off
     if (!enabled) {
       const dest = DESTINATIONS.find((d) => d.id === selected);
       if (dest?.opmOnly && dest.id !== "eeloo-opm") setSelected(null);
+      const orig = DESTINATIONS.find((d) => d.id === originId);
+      if (orig?.opmOnly && orig.id !== "eeloo-opm") setOriginId(null);
     }
   }
 
@@ -85,6 +90,10 @@ export default function Home() {
     if (d && DESTINATIONS.find((dest) => dest.id === d && (opm ? !dest.stockOnly : !dest.opmOnly))) {
       setSelected(d);
     }
+    const o = params.get("o");
+    if (o && o !== "kerbin" && DESTINATIONS.find((dest) => dest.id === o && (opm ? !dest.stockOnly : !dest.opmOnly))) {
+      setOriginId(o);
+    }
     if (params.get("r") === "1") setIsReturn(true);
     if (params.get("lko") === "1") setFromLKO(true);
     if (params.get("orb") === "1") setOrbitOnly(true);
@@ -96,13 +105,14 @@ export default function Home() {
   useEffect(() => {
     const params = new URLSearchParams();
     if (selected) params.set("d", selected);
+    if (originId) params.set("o", originId);
     if (isReturn) params.set("r", "1");
     if (fromLKO) params.set("lko", "1");
     if (orbitOnly) params.set("orb", "1");
     if (redundancy > 0) params.set("margin", String(redundancy));
     const qs = params.toString();
     window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
-  }, [selected, isReturn, fromLKO, orbitOnly, redundancy]);
+  }, [selected, originId, isReturn, fromLKO, orbitOnly, redundancy]);
 
   // ── Keyboard navigation ───────────────────────────────────────────────────
   useEffect(() => {
@@ -239,6 +249,8 @@ export default function Home() {
           <div className="w-full xl:w-96 flex-shrink-0">
             <MissionPanel
               destinationId={selected}
+              originId={originId}
+              onSetOrigin={setOriginId}
               isReturn={isReturn}
               onToggleReturn={() => setIsReturn((v) => !v)}
               fromLKO={fromLKO}

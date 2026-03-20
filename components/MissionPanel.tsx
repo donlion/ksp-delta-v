@@ -8,6 +8,8 @@ import {
   ISRU_COLORS,
   buildReturnLegs,
   KERBIN_GRAVITY,
+  INTRA_SYSTEM_DV,
+  getOrbitLabel,
   type Leg,
 } from "@/lib/deltav-data";
 import {
@@ -18,6 +20,8 @@ import {
 
 interface Props {
   destinationId: string | null;
+  originId: string | null;
+  onSetOrigin: (id: string | null) => void;
   isReturn: boolean;
   onToggleReturn: () => void;
   fromLKO: boolean;
@@ -120,6 +124,8 @@ const CATEGORY_ORDER: TipCategory[] = ["vessel", "terrain", "lore", "egg"];
 
 export default function MissionPanel({
   destinationId,
+  originId,
+  onSetOrigin,
   isReturn,
   onToggleReturn,
   fromLKO,
@@ -171,20 +177,133 @@ export default function MissionPanel({
   const dest = destinationId
     ? (DESTINATIONS.find((d) => d.id === destinationId) ?? null)
     : null;
-  const hasNoSurface = dest?.id === "jool";
-  const outboundLegs = dest
-    ? dest.legs.slice(
-        fromLKO ? 1 : 0,
-        !hasNoSurface && orbitOnly ? -1 : undefined,
-      )
-    : [];
-  const returnLegs = dest
-    ? buildReturnLegs(dest.legs).slice(
-        orbitOnly ? 1 : 0,
-        fromLKO ? -1 : undefined,
-      )
-    : [];
-  const allLegs: { label: string; legs: Leg[] }[] = dest
+  const originDest = originId
+    ? (DESTINATIONS.find((d) => d.id === originId) ?? null)
+    : null;
+  const isSameAsOrigin = originId !== null && originId === destinationId;
+  const hasNoSurface = dest?.surfaceGravity == null && dest != null;
+  const originHasNoSurface = originDest?.surfaceGravity == null && originDest != null;
+
+  const isKerbinDest = dest?.id === "kerbin";
+  // When Kerbin is selected but no custom origin is set, there's no route to compute
+  const isKerbinNoOrigin = isKerbinDest && !originDest;
+
+  let outboundLegs: Leg[];
+  let returnLegs: Leg[];
+
+  if (dest && originDest && !isSameAsOrigin) {
+    // ── Hardcoded same-system transfer ──────────────────────────────────────
+    // When both bodies share a parent planet, use a pre-computed orbit-to-orbit
+    // Δv rather than deriving it from the Kerbin-to-destination leg data.
+    // This is necessary because some bodies (e.g. Laythe) use an optimised
+    // aero-capture path that bypasses the parent planet's low orbit, making the
+    // common-prefix algorithm produce incorrect intra-system costs.
+    const intraKey = [originId, destinationId].sort().join("|");
+    const intraDV = INTRA_SYSTEM_DV[intraKey];
+
+    if (intraDV !== undefined) {
+      const originOrbitLabel = getOrbitLabel(originDest);
+      const destOrbitLabel   = getOrbitLabel(dest);
+
+      // Surface departure from origin (reversed last leg)
+      const oSurfLeg = originHasNoSurface ? null : originDest.legs[originDest.legs.length - 1];
+      const dSurfLeg = hasNoSurface       ? null : dest.legs[dest.legs.length - 1];
+
+      const originDep: Leg[] =
+        oSurfLeg && !fromLKO
+          ? [{ from: oSurfLeg.to, to: oSurfLeg.from, deltaV: oSurfLeg.deltaV, canAerobrake: oSurfLeg.canAerobrake }]
+          : [];
+      const transferLeg: Leg = { from: originOrbitLabel, to: destOrbitLabel, deltaV: intraDV };
+      const destArr: Leg[]   = dSurfLeg && !orbitOnly ? [dSurfLeg] : [];
+
+      outboundLegs = [...originDep, transferLeg, ...destArr];
+
+      // Return: dest (surface →) orbit → transfer → orbit (→ origin surface)
+      const retDep: Leg[] =
+        dSurfLeg && !orbitOnly
+          ? [{ from: dSurfLeg.to, to: dSurfLeg.from, deltaV: dSurfLeg.deltaV, canAerobrake: dSurfLeg.canAerobrake }]
+          : [];
+      const retTransfer: Leg = { from: destOrbitLabel, to: originOrbitLabel, deltaV: intraDV };
+      const retArr: Leg[]    = oSurfLeg && !fromLKO ? [oSurfLeg] : [];
+
+      returnLegs = [...retDep, retTransfer, ...retArr];
+    } else {
+      // ── Common-prefix routing ──────────────────────────────────────────────
+      // Find how many leading legs origin and destination share (e.g. both Jool
+      // moons that go via LJO share [Kerbin→LKO, LKO→Jool Transfer, Jool SOI→LJO]),
+      // so we route through the deepest common waypoint instead of LKO.
+      let commonLen = 0;
+      while (
+        commonLen < originDest.legs.length &&
+        commonLen < dest.legs.length &&
+        originDest.legs[commonLen].from === dest.legs[commonLen].from &&
+        originDest.legs[commonLen].to === dest.legs[commonLen].to
+      ) {
+        commonLen++;
+      }
+
+      const originUnique = originDest.legs.slice(commonLen);
+      const destUnique   = dest.legs.slice(commonLen);
+
+      // Origin departure: reverse the unique origin legs
+      const originDepartureFull: Leg[] = [...originUnique].reverse().map((leg) => ({
+        from: leg.to,
+        to: leg.from,
+        deltaV: leg.deltaV,
+        canAerobrake: leg.canAerobrake,
+      }));
+      const originDeparture =
+        fromLKO && !originHasNoSurface
+          ? originDepartureFull.slice(1)
+          : originDepartureFull;
+
+      // Destination arrival
+      const destArrival =
+        !hasNoSurface && !isKerbinDest && orbitOnly
+          ? destUnique.slice(0, -1)
+          : destUnique;
+
+      outboundLegs = [...originDeparture, ...destArrival];
+
+      // Return: destination → junction → origin
+      const destReturnRaw: Leg[] = [...destUnique].reverse().map((leg) => ({
+        from: leg.to,
+        to: leg.from,
+        deltaV: leg.deltaV,
+        canAerobrake: leg.canAerobrake,
+      }));
+      // Fix reversed Kerbin-aerobrake leg: arriving back at Kerbin costs just 80 m/s,
+      // but departing from Kerbin surface costs 3 400 m/s.
+      const destReturnFixed = destReturnRaw.map((leg, i) =>
+        i === 0 && leg.from === "Kerbin Surface" && leg.to === "Low Kerbin Orbit"
+          ? { ...leg, deltaV: 3400, canAerobrake: false }
+          : leg
+      );
+      const destReturn = destReturnFixed.slice(orbitOnly && !isKerbinDest ? 1 : 0);
+
+      const toOrigin =
+        fromLKO && !originHasNoSurface
+          ? originUnique.slice(0, -1)
+          : originUnique;
+
+      returnLegs = [...destReturn, ...toOrigin];
+    }
+  } else if (dest) {
+    // Default Kerbin origin
+    outboundLegs = dest.legs.slice(
+      fromLKO ? 1 : 0,
+      !hasNoSurface && orbitOnly ? -1 : undefined,
+    );
+    returnLegs = buildReturnLegs(dest.legs).slice(
+      orbitOnly ? 1 : 0,
+      fromLKO ? -1 : undefined,
+    );
+  } else {
+    outboundLegs = [];
+    returnLegs = [];
+  }
+
+  const allLegs: { label: string; legs: Leg[] }[] = dest && !isSameAsOrigin && !isKerbinNoOrigin
     ? isReturn
       ? [
           { label: "Outbound", legs: outboundLegs },
@@ -259,6 +378,7 @@ export default function MissionPanel({
 
   const d = dest!;
   const color = BODY_COLORS[d.id] ?? "var(--c-hal)";
+  const originColor = originDest ? (BODY_COLORS[originDest.id] ?? "var(--c-hal)") : color;
 
   return (
     <div
@@ -295,6 +415,23 @@ export default function MissionPanel({
           >
             {copied ? "✓ Copied" : "Share ↗"}
           </button>
+          {isSameAsOrigin ? (
+            <span
+              className="text-xs font-mono uppercase tracking-widest"
+              style={{ color: color, opacity: 0.5 }}
+            >
+              Origin
+            </span>
+          ) : !isKerbinDest ? (
+            <button
+              onClick={() => onSetOrigin(destinationId)}
+              className="text-xs font-mono uppercase tracking-widest cursor-pointer transition-colors"
+              style={{ color: originId === destinationId ? color : "var(--c-text3)" }}
+              title={`Set ${d.name} as the mission origin`}
+            >
+              Set as origin
+            </button>
+          ) : null}
           <span
             className="text-xs font-mono uppercase tracking-widest"
             style={{ color: color, opacity: 0.7 }}
@@ -303,6 +440,52 @@ export default function MissionPanel({
           </span>
         </span>
       </div>
+
+      {/* Origin indicator */}
+      {originDest && !isSameAsOrigin && (
+        <div
+          className="px-4 py-2 flex items-center justify-between flex-shrink-0"
+          style={{
+            background: originColor + "18",
+            borderBottom: `1px solid ${originColor}35`,
+          }}
+        >
+          <span className="flex items-center gap-2">
+            <span
+              className="text-xs font-mono uppercase tracking-widest"
+              style={{ color: "var(--c-text3)" }}
+            >
+              From
+            </span>
+            <span
+              className="text-xs font-mono font-bold uppercase tracking-widest"
+              style={{ color: originColor }}
+            >
+              {originDest.name}
+            </span>
+            <span
+              className="text-xs font-mono"
+              style={{ color: "var(--c-text3)" }}
+            >
+              →
+            </span>
+            <span
+              className="text-xs font-mono font-bold uppercase tracking-widest"
+              style={{ color: color }}
+            >
+              {d.name}
+            </span>
+          </span>
+          <button
+            onClick={() => onSetOrigin(null)}
+            className="text-xs font-mono cursor-pointer transition-colors"
+            style={{ color: "var(--c-text3)" }}
+            title="Clear origin — reset to Kerbin"
+          >
+            × Clear
+          </button>
+        </div>
+      )}
 
       <div className="p-5 flex flex-col gap-5">
         {/* Header */}
@@ -380,22 +563,32 @@ export default function MissionPanel({
         </div>
 
         {/* Toggle switches */}
-        <div className="flex gap-6">
+        <div className="flex gap-6 flex-wrap">
           <ToggleSwitch
             active={isReturn}
             onClick={onToggleReturn}
             label="Return"
             color={color}
-            title="Return trip — include the delta-v needed to return back to Kerbin"
+            title={
+              originDest && !isSameAsOrigin
+                ? `Return trip — include the delta-v needed to return back to ${originDest.name}`
+                : "Return trip — include the delta-v needed to return back to Kerbin"
+            }
           />
-          <ToggleSwitch
-            active={fromLKO}
-            onClick={onToggleFromLKO}
-            label="From LKO"
-            color={color}
-            title="From Low Kerbin Orbit — start the mission from LKO instead of Kerbin's surface (excludes the ~3,400 m/s launch cost)"
-          />
-          {!hasNoSurface && (
+          {!(originDest && originHasNoSurface) && (
+            <ToggleSwitch
+              active={fromLKO}
+              onClick={onToggleFromLKO}
+              label={originDest && !isSameAsOrigin ? "From orbit" : "From LKO"}
+              color={color}
+              title={
+                originDest && !isSameAsOrigin
+                  ? `From ${originDest.name} orbit — skip the surface-to-orbit burn at the origin`
+                  : "From Low Kerbin Orbit — start the mission from LKO instead of Kerbin's surface (excludes the ~3,400 m/s launch cost)"
+              }
+            />
+          )}
+          {!hasNoSurface && !isKerbinDest && (
             <ToggleSwitch
               active={orbitOnly}
               onClick={onToggleOrbitOnly}
@@ -435,8 +628,38 @@ export default function MissionPanel({
           </span>
         </div>
 
-        {/* Leg sections — keyed on destinationId so CSS animations replay on body change */}
-        <div key={destinationId}>
+        {/* Kerbin-as-destination hint when no custom origin is set */}
+        {isKerbinNoOrigin && (
+          <div
+            className="p-3 text-center"
+            style={{ background: color + "12", border: `1px solid ${color}30` }}
+          >
+            <p className="text-xs font-mono" style={{ color: "var(--c-text3)" }}>
+              Kerbin is the default origin.
+            </p>
+            <p className="text-xs font-mono mt-1" style={{ color: "var(--c-text3)" }}>
+              Set a different body as origin to plan travel to Kerbin.
+            </p>
+          </div>
+        )}
+
+        {/* Same-as-origin warning */}
+        {isSameAsOrigin && (
+          <div
+            className="p-3 text-center"
+            style={{ background: color + "12", border: `1px solid ${color}30` }}
+          >
+            <p className="text-xs font-mono" style={{ color: "var(--c-text3)" }}>
+              This body is set as the origin.
+            </p>
+            <p className="text-xs font-mono mt-1" style={{ color: "var(--c-text3)" }}>
+              Select a different destination on the map.
+            </p>
+          </div>
+        )}
+
+        {/* Leg sections — keyed on destinationId+originId so CSS animations replay on change */}
+        <div key={`${destinationId}-${originId}`}>
           {allLegs.map(({ label, legs }) => (
             <div key={label || "oneway"} className="mb-2 last:mb-0">
               {label && (
@@ -486,7 +709,9 @@ export default function MissionPanel({
             className="text-xs font-mono uppercase tracking-widest mb-2"
             style={{ color: color, opacity: 0.85 }}
           >
-            Total Mission Δv
+            {originDest && !isSameAsOrigin
+              ? `${originDest.name} → ${d.name}`
+              : "Total Mission Δv"}
           </p>
           <div
             className="h-px w-16 mx-auto mb-3"

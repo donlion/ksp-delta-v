@@ -71,6 +71,20 @@ export const KERBIN_GRAVITY = 9.81;
 export const DESTINATIONS: Destination[] = [
   // ── Kerbin System ────────────────────────────────────────────────────────
   {
+    id: "kerbin",
+    name: "Kerbin",
+    group: "Kerbin System",
+    difficulty: "Beginner",
+    description:
+      "Home. The blue-green jewel of the Kerbol system. Its thick atmosphere enables aerobrake capture — deorbit from LKO costs a mere 80 m/s.",
+    surfaceGravity: 9.81,
+    scienceMultiplier: 1,
+    legs: [
+      { from: "Kerbin Surface", to: "Low Kerbin Orbit", deltaV: 3400 },
+      { from: "Low Kerbin Orbit", to: "Kerbin Surface", deltaV: 80, canAerobrake: true },
+    ],
+  },
+  {
     id: "mun",
     name: "Mun",
     group: "Kerbin System",
@@ -711,6 +725,7 @@ export const DESTINATION_GROUPS: DestinationGroup[] = [
 
 /** Per-body accent colors (matches DeltaVMap node strokes) */
 export const BODY_COLORS: Record<string, string> = {
+  kerbin:     "#4070d0",
   mun:        "#909090",
   minmus:     "#50a060",
   moho:       "#c8a050",
@@ -744,6 +759,100 @@ export const BODY_COLORS: Record<string, string> = {
   thatmo:     "#607888",
   nissee:     "#b0b8c8",
 };
+
+/**
+ * Hardcoded orbit-to-orbit delta-v for same-system transfers.
+ * Key: sorted body IDs joined by "|". Value: Δv in m/s.
+ *
+ * Sources:
+ *  • Vanilla KSP moon pairs: blaarkies/ksp-visual-calculator (delta-v-graph.ts),
+ *    formula: ejectDv + planeChangeDv + captureDv (direct Hohmann/bielliptic).
+ *    Propulsive costs only — no aerocapture savings applied.
+ *  • Jool↔moon costs: community delta-v map edge labels (include aerocapture for
+ *    Laythe). jool|laythe MUST be hardcoded — Laythe's legs bypass LJO via a direct
+ *    SOI-entry aerocapture, breaking the common-prefix routing algorithm.
+ *  • OPM Sarnus moon pairs: Kowgan ksp_cheat_sheets OPM delta-v map (v1.8.1),
+ *    average of forward/reverse eject+capture costs from the SVG data.
+ *  • OPM Urlum / Neidon / Plock: derived from existing leg data (parent-orbit hub).
+ */
+export const INTRA_SYSTEM_DV: Record<string, number> = {
+  // ── Kerbin system (blaarkies: eject 215 + plane 2 + capture 85) ──────────
+  "minmus|mun":          310,
+
+  // ── Eve system (blaarkies: LEvO→LGO ≈ 1 484 m/s propulsive) ─────────────
+  // The 60+30 m/s in the leg data is the incremental cost from an Eve intercept
+  // trajectory, not from a circular low Eve orbit.
+  "eve|gilly":          1480,
+
+  // ── Duna system (blaarkies: LDO→LIO ≈ 413 m/s) ───────────────────────────
+  "duna|ike":            410,
+
+  // ── Jool system — moon pairs (blaarkies direct transfer values) ───────────
+  // Much cheaper than routing via LJO (which would give 2 880–6 740 m/s).
+  "bop|laythe":         1190,  // 404 + 2 + 787
+  "bop|pol":             260,  // 75  + 2 + 182
+  "bop|tylo":           1010,  // 109 + 2 + 894
+  "bop|vall":            790,  // 304 + 2 + 483
+  "laythe|pol":         1220,  // 416 + 2 + 797
+  "laythe|tylo":        1500,  // 848 + 2 + 649
+  "laythe|vall":         960,  // 330 + 2 + 628
+  "pol|tylo":           1030,  // 178 + 2 + 846
+  "pol|vall":            800,  // 303 + 2 + 495
+  "tylo|vall":          1190,  // 830 + 2 + 357
+
+  // ── Jool system — Jool↔moon (community delta-v map, LJO costs) ───────────
+  // Tylo/Vall/Bop/Pol also computed correctly by common-prefix algorithm, but
+  // hardcoded here for explicitness. jool|laythe cannot be derived algorithmically.
+  "bop|jool":           3100,  // LJO→Bop: 2200+900
+  "jool|laythe":        1510,  // community map (aerocapture at Laythe)
+  "jool|pol":           3640,  // LJO→Pol: 2820+820
+  "jool|tylo":          1500,  // LJO→Tylo: 400+1100
+  "jool|vall":          1380,  // LJO→Vall: 620+760
+
+  // ── Sarnus system (OPM) — moon pairs (Kowgan SVG, avg of both directions) ─
+  // Eject/capture from SVG: Hale(540/70), Ovok(650/100), Eeloo(1120/160),
+  //                         Slate(1460/155), Tekto(1540/630).
+  "hale|ovok":           680,  // (540+100 + 650+70) / 2
+  "eeloo-opm|hale":      950,  // (540+160 + 1120+70) / 2
+  "hale|slate":         1110,  // (540+155 + 1460+70) / 2
+  "hale|tekto":         1390,  // (540+630 + 1540+70) / 2
+  "eeloo-opm|ovok":     1020,  // (650+160 + 1120+100) / 2
+  "ovok|slate":         1180,  // (650+155 + 1460+100) / 2
+  "ovok|tekto":         1460,  // (650+630 + 1540+100) / 2
+  "eeloo-opm|slate":    1450,  // (1120+155 + 1460+160) / 2
+  "eeloo-opm|tekto":    1730,  // (1120+630 + 1540+160) / 2
+  "slate|tekto":        1890,  // (1460+630 + 1540+155) / 2
+  // Sarnus↔moon handled correctly by common-prefix algorithm (all share legs to LSO).
+
+  // ── Urlum system (OPM) — via Low Urlum Orbit hub (leg data) ──────────────
+  // LUO↔moon: Polta 780, Priax 790, Wal 1480. Tal orbits Wal (LWO→Tal = 300).
+  "polta|priax":        1570,  // 780 + 790
+  "polta|wal":          2260,  // 780 + 1480
+  "priax|wal":          2270,  // 790 + 1480
+  "tal|wal":             300,
+  "polta|tal":          2560,  // 780 + 1480 + 300  (via LUO then LWO)
+  "priax|tal":          2570,  // 790 + 1480 + 300
+  "tal|urlum":          1780,  // 300 + 1480
+  // Urlum↔moon handled correctly by common-prefix algorithm.
+
+  // ── Neidon system (OPM) ───────────────────────────────────────────────────
+  // Kowgan SVG: Thatmo↔Nissee ~850–930 m/s (avg ~890). Via-LNO gives 2 690 m/s.
+  "nissee|thatmo":       890,
+  // Neidon↔moon handled correctly by common-prefix algorithm.
+
+  // ── Plock system (OPM) ────────────────────────────────────────────────────
+  "karen|plock":         100,  // LPO→Karen Transfer (from leg data)
+};
+
+/**
+ * Get the "low orbit" label for a body — the last waypoint before the surface.
+ * For gas giants (no surface) it is the "to" of the last leg; for solid bodies
+ * it is the "from" of the last leg.
+ */
+export function getOrbitLabel(dest: Destination): string {
+  const last = dest.legs[dest.legs.length - 1];
+  return dest.surfaceGravity == null ? last.to : last.from;
+}
 
 /**
  * Build the return legs: same path in reverse.
