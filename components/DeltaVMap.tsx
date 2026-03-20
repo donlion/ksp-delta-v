@@ -173,13 +173,14 @@ function labelPos(node: NodeDef): { x: number; y: number; anchor: "middle" | "st
 interface Props {
   selected: string | null;
   onSelect: (id: string) => void;
-  opmEnabled: boolean;
+  scaleMode: "stock" | "opm" | "quarter" | "rss";
 }
 
-export default function DeltaVMap({ selected, onSelect, opmEnabled }: Props) {
+export default function DeltaVMap({ selected, onSelect, scaleMode }: Props) {
   const [hovered, setHovered] = useState<string | null>(null);
   const [bloomed, setBloomed] = useState<Set<string>>(new Set());
 
+  const opmEnabled = scaleMode === "opm";
   const allNodes = opmEnabled ? { ...NODES, ...OPM_NODES } : NODES;
   const activeEdges = opmEnabled
     ? [...EDGES, ...OPM_EDGES]
@@ -192,7 +193,18 @@ export default function DeltaVMap({ selected, onSelect, opmEnabled }: Props) {
     ids.forEach((id, i) => {
       setTimeout(() => setBloomed((prev) => new Set([...prev, id])), i * 110);
     });
-  }, [opmEnabled]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [scaleMode]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (scaleMode === "rss" || scaleMode === "quarter") {
+    return (
+      <div
+        className="flex items-center justify-center font-mono text-xs uppercase tracking-widest"
+        style={{ minHeight: 200, color: "var(--c-text3)" }}
+      >
+        [ Δv map not available for this planet pack · switch to List view ]
+      </div>
+    );
+  }
 
   const viewBox = opmEnabled ? "0 0 1600 570" : "0 0 920 570";
 

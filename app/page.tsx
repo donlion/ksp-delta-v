@@ -7,6 +7,7 @@ import MissionPanel from "@/components/MissionPanel";
 import ThemeToggle from "@/components/ThemeToggle";
 import SettingsToggle from "@/components/SettingsToggle";
 import { DESTINATIONS } from "@/lib/deltav-data";
+import type { ScaleMode } from "@/lib/deltav-data";
 
 /** Four L-shaped corner brackets in HAL red */
 function CornerBrackets() {
@@ -56,42 +57,49 @@ export default function Home() {
   const [fromLKO, setFromLKO] = useState(false);
   const [orbitOnly, setOrbitOnly] = useState(false);
   const [redundancy, setRedundancy] = useState(0);
-  const [opmEnabled, setOpmEnabled] = useState(false);
+  const [scaleMode, setScaleMode] = useState<ScaleMode>("stock");
 
-  const activeDestinations = DESTINATIONS.filter((d) =>
-    opmEnabled ? !d.stockOnly : !d.opmOnly
-  );
+  const activeDestinations = DESTINATIONS.filter((d) => {
+    if (scaleMode === "stock")   return !d.opmOnly && !d.rssOnly && !d.quarterScaleOnly;
+    if (scaleMode === "opm")     return !d.stockOnly && !d.rssOnly && !d.quarterScaleOnly;
+    if (scaleMode === "rss")     return d.rssOnly === true;
+    if (scaleMode === "quarter") return d.quarterScaleOnly === true;
+    return false;
+  });
 
-  function handleOpmToggle(enabled: boolean) {
-    setOpmEnabled(enabled);
-    localStorage.setItem("ksp-opm", enabled ? "1" : "0");
+  function handleScaleChange(mode: ScaleMode) {
+    const prev = scaleMode;
+    setScaleMode(mode);
+    localStorage.setItem("ksp-scale", mode);
+
     // Swap Eeloo between stock and OPM versions seamlessly
-    if (enabled && selected === "eeloo") setSelected("eeloo-opm");
-    if (!enabled && selected === "eeloo-opm") setSelected("eeloo");
-    if (enabled && originId === "eeloo") setOriginId("eeloo-opm");
-    if (!enabled && originId === "eeloo-opm") setOriginId("eeloo");
-    // Deselect any other OPM-only destination when turning off
-    if (!enabled) {
+    if (mode === "opm" && selected === "eeloo") setSelected("eeloo-opm");
+    if (mode !== "opm" && selected === "eeloo-opm") setSelected("eeloo");
+    if (mode === "opm" && originId === "eeloo") setOriginId("eeloo-opm");
+    if (mode !== "opm" && originId === "eeloo-opm") setOriginId("eeloo");
+
+    // Clear selection when switching away from a mode-specific destination
+    if (mode !== prev) {
       const dest = DESTINATIONS.find((d) => d.id === selected);
-      if (dest?.opmOnly && dest.id !== "eeloo-opm") setSelected(null);
+      if (dest && (dest.opmOnly || dest.rssOnly || dest.quarterScaleOnly)) setSelected(null);
       const orig = DESTINATIONS.find((d) => d.id === originId);
-      if (orig?.opmOnly && orig.id !== "eeloo-opm") setOriginId(null);
+      if (orig && (orig.opmOnly || orig.rssOnly || orig.quarterScaleOnly)) setOriginId(null);
     }
   }
 
   // ── Read URL params + localStorage on mount ────────────────────────────────
   useEffect(() => {
-    const opmStored = localStorage.getItem("ksp-opm");
-    const opm = opmStored === "1";
-    if (opm) setOpmEnabled(true);
+    const stored = localStorage.getItem("ksp-scale") as ScaleMode | null;
+    const mode: ScaleMode = stored && ["stock", "opm", "quarter", "rss"].includes(stored) ? stored : "stock";
+    if (mode !== "stock") setScaleMode(mode);
 
     const params = new URLSearchParams(window.location.search);
     const d = params.get("d");
-    if (d && DESTINATIONS.find((dest) => dest.id === d && (opm ? !dest.stockOnly : !dest.opmOnly))) {
+    if (d && DESTINATIONS.find((dest) => dest.id === d)) {
       setSelected(d);
     }
     const o = params.get("o");
-    if (o && o !== "kerbin" && DESTINATIONS.find((dest) => dest.id === o && (opm ? !dest.stockOnly : !dest.opmOnly))) {
+    if (o && o !== "kerbin" && DESTINATIONS.find((dest) => dest.id === o)) {
       setOriginId(o);
     }
     if (params.get("r") === "1") setIsReturn(true);
@@ -150,7 +158,7 @@ export default function Home() {
             </p>
           </div>
           <div className="flex items-start gap-2">
-            <SettingsToggle opmEnabled={opmEnabled} onToggleOpm={handleOpmToggle} />
+            <SettingsToggle scaleMode={scaleMode} onScaleChange={handleScaleChange} />
             <ThemeToggle />
           </div>
         </header>
@@ -220,7 +228,7 @@ export default function Home() {
             >
               {mapView === "map" ? (
                 <>
-                  <DeltaVMap selected={selected} onSelect={setSelected} opmEnabled={opmEnabled} />
+                  <DeltaVMap selected={selected} onSelect={setSelected} scaleMode={scaleMode} />
                   {/* CRT vignette */}
                   <div
                     className="map-vignette"
@@ -240,7 +248,7 @@ export default function Home() {
                   </p>
                 </>
               ) : (
-                <BodyList selected={selected} onSelect={setSelected} opmEnabled={opmEnabled} />
+                <BodyList selected={selected} onSelect={setSelected} scaleMode={scaleMode} />
               )}
             </div>
           </div>
